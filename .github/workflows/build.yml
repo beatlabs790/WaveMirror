@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-apk:
-    name: Build Universal APK
+    name: Build Universal Signed APK
     runs-on: ubuntu-latest
 
     steps:
@@ -27,19 +27,19 @@ jobs:
         with:
           gradle-version: '8.10'
 
-      - name: Build Release APK
+      - name: Build Signed Release APK
         run: |
           cd app
           gradle assembleRelease --no-daemon
 
-      - name: Prepare Artifact Output
+      - name: Prepare Signed APK Output
         run: |
           mkdir -p output_apk
-          find app/app/build/outputs/apk/ -name "*.apk" -exec cp {} output_apk/WaveMirror-Release.apk \;
+          find app/app/build/outputs/apk/ -name "*.apk" -exec cp {} output_apk/WaveMirror-Signed.apk \;
 
-      - name: Upload Release APK Artifact
+      - name: Upload Signed APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: WaveMirror-Release-APK
-          path: output_apk/WaveMirror-Release.apk
+          name: WaveMirror-Signed-APK
+          path: output_apk/WaveMirror-Signed.apk
           if-no-files-found: error
