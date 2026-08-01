@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMirror | Free Cinema & Series Streaming</title>
+    <meta name="description" content="WaveMirror - Stream top trending movies, 4K HDR series, original blockbusters, and live trailers 100% free with zero ads or tab popups. Powered by TMDB API.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Global Loader -->
+    <div id="global-loader">
+        <div class="loader-spinner"></div>
+        <p style="font-size: 0.9rem; font-weight: 600; color: var(--primary-cyan); letter-spacing: 1px;">LOADING WAVEMIRROR...</p>
+    </div>
+
+    <!-- Navigation Bar -->
+    <header class="navbar" id="navbar">
+        <div class="nav-left">
+            <a class="brand-logo" onclick="scrollToSection('hero')">
+                <img src="9dff5f12-e1c4-4575-81f4-5184844ca983.png" alt="WaveMirror Logo" class="brand-logo-img">
+                <span class="brand-title">WaveMirror</span>
+                <span class="brand-badge" style="background: linear-gradient(90deg, #00f2fe, #4facfe); color: #000;">100% FREE</span>
+            </a>
+            <ul class="nav-links">
+                <li><a class="nav-link active" onclick="scrollToSection('hero')">Home</a></li>
+                <li><a class="nav-link" onclick="scrollToSection('trending')">Top 10</a></li>
+                <li><a class="nav-link" onclick="scrollToSection('explore')">Explore</a></li>
+                <li><a class="nav-link" onclick="scrollToSection('series')">TV Series</a></li>
+                <li><a class="nav-link" onclick="scrollToSection('upcoming')">Upcoming</a></li>
+                <li><a class="nav-link" onclick="scrollToSection('free-pass')">Free Pass</a></li>
+            </ul>
+        </div>
+
+        <div class="nav-right">
+            <!-- In-App Predictive Search Bar -->
+            <div class="search-wrapper">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search movies, series..." onkeyup="handleSearch(event)">
+            </div>
+
+            <!-- In-App Instagram Profile Modal Toggle -->
+            <button class="social-pill" onclick="openSocialModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                <span>@_beat_labs</span>
+            </button>
+
+            <!-- Watchlist Drawer Button -->
+            <button class="btn-icon" onclick="toggleWatchlistDrawer()" title="Saved Watchlist">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                <span class="badge-count" id="watchlistCount">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main>
+        <!-- Hero Spotlight Slider Section -->
+        <section class="hero-section" id="hero">
+            <div class="hero-slider" id="heroSlider">
+                <!-- Dynamic Hero Slides Injected Here -->
+            </div>
+            <div class="hero-controls" id="heroDots">
+                <!-- Dots injected via JS -->
+            </div>
+        </section>
+
+        <div class="main-container">
+            <!-- Top 10 Trending Rail Section -->
+            <section style="margin-bottom: 3.5rem;" id="trending">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Top 10 Trending Today</h2>
+                        <p class="section-subtitle">Most watched movies and shows right now on WaveMirror - Powered by TMDB API</p>
+                    </div>
+                </div>
+                <div class="top10-grid" id="top10Grid">
+                    <!-- Top 10 Cards Injected Here -->
+                </div>
+            </section>
+
+            <!-- Genre & Catalog Explorer Section -->
+            <section id="explore" style="margin-bottom: 3.5rem;">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title" id="exploreHeaderTitle">Explore Catalog</h2>
+                        <p class="section-subtitle">Filter by your favorite genres and instant free titles</p>
+                    </div>
+                </div>
+
+                <!-- Genre Filter Chips -->
+                <div class="genre-bar" id="genreChips">
+                    <button class="genre-chip active" onclick="filterGenre('All')">All Titles</button>
+                    <button class="genre-chip" onclick="filterGenre('Action')">Action</button>
+                    <button class="genre-chip" onclick="filterGenre('Sci-Fi')">Sci-Fi</button>
+                    <button class="genre-chip" onclick="filterGenre('Adventure')">Adventure</button>
+                    <button class="genre-chip" onclick="filterGenre('Drama')">Drama</button>
+                    <button class="genre-chip" onclick="filterGenre('Fantasy')">Fantasy</button>
+                    <button class="genre-chip" onclick="filterGenre('Horror')">Horror</button>
+                    <button class="genre-chip" onclick="filterGenre('Animation')">Animation</button>
+                    <button class="genre-chip" onclick="filterGenre('Biography')">Biography</button>
+                </div>
+
+                <!-- Movie Grid Container -->
+                <div class="movie-grid" id="movieGrid">
+                    <!-- Movie Cards Injected Here -->
+                </div>
+            </section>
+
+            <!-- TV Shows & Series Section -->
+            <section id="series" style="margin-bottom: 3.5rem;">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Trending TV Series</h2>
+                        <p class="section-subtitle">Binge-worthy multi-season TV series with episode selection</p>
+                    </div>
+                </div>
+                <div class="movie-grid" id="seriesGrid">
+                    <!-- Series Cards Injected Here -->
+                </div>
+            </section>
+
+            <!-- Upcoming Release Calendar Section -->
+            <section id="upcoming" style="margin-bottom: 3.5rem;">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Upcoming Blockbusters</h2>
+                        <p class="section-subtitle">Coming soon to WaveMirror 4K</p>
+                    </div>
+                </div>
+                <div class="info-section-grid">
+                    <div class="glass-box">
+                        <span class="hero-tag">OCTOBER 2026</span>
+                        <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 0.5rem 0;">Deadpool & Wolverine</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">The Merc with a Mouth joins forces with Wolverine in an epic multiverse crossover.</p>
+                        <button class="btn-secondary" onclick="showToast('Free Reminder set for Deadpool & Wolverine release!')">Set Free Reminder</button>
+                    </div>
+                    <div class="glass-box">
+                        <span class="hero-tag">NOVEMBER 2026</span>
+                        <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 0.5rem 0;">Gladiator II</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">Years after the death of Maximus, Lucius steps into the Colosseum to restore Rome's glory.</p>
+                        <button class="btn-secondary" onclick="showToast('Free Reminder set for Gladiator II release!')">Set Free Reminder</button>
+                    </div>
+                    <div class="glass-box">
+                        <span class="hero-tag">DECEMBER 2026</span>
+                        <h3 style="font-family: var(--font-heading); font-size: 1.4rem; margin: 0.5rem 0;">Avatar 3: Fire & Ash</h3>
+                        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">James Cameron takes us to the volcanic regions of Pandora with the Ash People.</p>
+                        <button class="btn-secondary" onclick="showToast('Free Reminder set for Avatar 3 release!')">Set Free Reminder</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 100% Free Pass Section -->
+            <section id="free-pass" style="margin-bottom: 3.5rem;">
+                <div class="section-header" style="text-align: center; display: block;">
+                    <h2 class="section-title" style="justify-content: center;">WaveMirror 100% Free Access</h2>
+                    <p class="section-subtitle">No payment, credit cards, or registration required. Stream everything free forever.</p>
+                </div>
+                <div class="vip-grid">
+                    <div class="vip-card">
+                        <h3 style="font-family: var(--font-heading);">Instant Free Pass</h3>
+                        <div class="price-tag">$0.00</div>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Full 1080p & 4K Streaming<br>Zero Ads & No Credit Card<br>Unlimited Titles</p>
+                        <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="showToast('Instant Free Pass Active!')">Active Free Plan</button>
+                    </div>
+                    <div class="vip-card featured">
+                        <span class="hero-tag">UNLOCKED FOR EVERYONE</span>
+                        <h3 style="font-family: var(--font-heading); margin-top: 0.5rem;">Free Ultra 4K</h3>
+                        <div class="price-tag">$0.00<span style="font-size: 0.9rem;">/forever</span></div>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">4K HDR Sound<br>Unlimited Stream<br>Instant In-App Player<br>Multi-Device Support</p>
+                        <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="showToast('Free 4K Ultra Stream Mode Enabled!')">Stream 4K Free</button>
+                    </div>
+                    <div class="vip-card">
+                        <h3 style="font-family: var(--font-heading);">Free Lifetime</h3>
+                        <div class="price-tag">$0.00</div>
+                        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">Forever Free Access<br>All Future Releases<br>Community Built<br>No Paywalls</p>
+                        <button class="btn-secondary" style="width: 100%;" onclick="showToast('Free Lifetime Access Active!')">Enjoy Lifetime Free</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ Section -->
+            <section style="margin-bottom: 3.5rem;">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Frequently Asked Questions</h2>
+                        <p class="section-subtitle">Everything you need to know about WaveMirror</p>
+                    </div>
+                </div>
+                <div class="glass-box">
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-question"><span>Is WaveMirror completely free to watch?</span> <span>+</span></div>
+                        <div class="faq-answer">Yes! WaveMirror is 100% free with no paid subscriptions, credit cards, or accounts required.</div>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-question"><span>How do I switch servers or episodes?</span> <span>+</span></div>
+                        <div class="faq-answer">In the player modal, click Server 1 (vidsrc.pm), Server 2 (vidsrc.xyz), or Server 3 (vidsrc.to). For TV series, use the Season & Episode dropdowns to switch episodes instantly!</div>
+                    </div>
+                    <div class="faq-item" onclick="toggleFaq(this)">
+                        <div class="faq-question"><span>Why doesn't WaveMirror open new browser tabs?</span> <span>+</span></div>
+                        <div class="faq-answer">We redesigned the entire playback experience to run inside custom in-app video modals and tabbed server players, ensuring seamless, clutter-free streaming.</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- In-App Streaming Player & Movie Details Modal -->
+    <div class="modal-backdrop" id="playerModal">
+        <div class="modal-box">
+            <button class="modal-close-btn" onclick="closePlayerModal()">&times;</button>
+            <div class="player-wrapper" id="playerWrapper">
+                <iframe class="player-iframe" id="playerIframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+            <div class="modal-details">
+                <!-- TV Series Controls (Season & Episode Selectors) -->
+                <div id="tvControls" class="tv-controls-bar hidden" style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary-cyan);">Season:</label>
+                        <select id="seasonSelect" onchange="updateTvStream()" class="select-dropdown"></select>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary-cyan);">Episode:</label>
+                        <select id="episodeSelect" onchange="updateTvStream()" class="select-dropdown"></select>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 1rem;">
+                    <div class="server-switcher" id="serverSwitcher" style="margin-bottom: 0;">
+                        <!-- Dynamic server buttons injected here -->
+                    </div>
+                    <span style="font-size: 0.75rem; color: var(--primary-cyan); font-weight: 600;">▶ Tip: Switch servers if a stream is buffering</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <div>
+                        <h2 id="modalTitle" style="font-family: var(--font-heading); font-size: 2rem; font-weight: 800; color: #fff;">Movie Title</h2>
+                        <div style="display: flex; gap: 1rem; color: var(--text-muted); font-size: 0.9rem; margin-top: 0.4rem;" id="modalMeta">
+                            <span id="modalYear">2024</span>
+                            <span id="modalRating" style="color: var(--accent-gold); font-weight: 700;">★ 8.5</span>
+                            <span id="modalDuration">2h 46m</span>
+                        </div>
+                    </div>
+                    <button class="btn-primary" id="modalWatchlistBtn" onclick="handleModalWatchlistToggle()">+ Add to Watchlist</button>
+                </div>
+                <p id="modalOverview" style="color: #cbd5e1; line-height: 1.6; margin-bottom: 1.5rem;">Movie synopsis...</p>
+                <div style="display: flex; gap: 2rem; font-size: 0.9rem; color: var(--text-muted); flex-wrap: wrap;">
+                    <div><strong>Director:</strong> <span id="modalDirector" style="color: #fff;">-</span></div>
+                    <div><strong>Cast:</strong> <span id="modalCast" style="color: #fff;">-</span></div>
+                    <div><strong>Genres:</strong> <span id="modalGenres" style="color: var(--primary-cyan);">-</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- In-App Social Instagram Preview Modal -->
+    <div class="modal-backdrop" id="socialModal">
+        <div class="modal-box" style="max-width: 480px; text-align: center; padding: 2.5rem;">
+            <button class="modal-close-btn" onclick="closeSocialModal()">&times;</button>
+            <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.2rem; box-shadow: 0 0 25px rgba(220, 39, 67, 0.5);">
+                <svg width="42" height="42" viewBox="0 0 24 24" fill="#fff"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </div>
+            <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #fff;">@_beat_labs</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.4rem 0 1.5rem;">Official WaveMirror Creator & Audio Tech Labs</p>
+            <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem;">
+                <div style="background: rgba(255, 255, 255, 0.06); padding: 0.8rem 1.2rem; border-radius: var(--radius-sm);">
+                    <div style="font-weight: 800; font-size: 1.2rem; color: var(--primary-cyan);">148K</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">FOLLOWERS</div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.06); padding: 0.8rem 1.2rem; border-radius: var(--radius-sm);">
+                    <div style="font-weight: 800; font-size: 1.2rem; color: var(--primary-violet);">940+</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">RELEASE LABS</div>
+                </div>
+            </div>
+            <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="copyInstagramHandle()">Copy Handle @_beat_labs</button>
+        </div>
+    </div>
+
+    <!-- Watchlist Side Drawer -->
+    <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeWatchlistDrawer()">
+        <div class="drawer-panel" onclick="event.stopPropagation()">
+            <div class="drawer-header">
+                <span class="drawer-title">My Watchlist</span>
+                <button class="modal-close-btn" style="position: static; width: 32px; height: 32px; font-size: 1rem;" onclick="closeWatchlistDrawer()">&times;</button>
+            </div>
+            <div class="drawer-content" id="watchlistContent">
+                <!-- Saved watchlist items injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-col">
+                <div class="brand-logo" style="margin-bottom: 1rem;">
+                    <img src="9dff5f12-e1c4-4575-81f4-5184844ca983.png" alt="WaveMirror Logo" class="brand-logo-img">
+                    <span class="brand-title">WaveMirror</span>
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">Next-gen movie streaming platform powered by TMDB API. Tab-free immersion.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Navigation</h4>
+                <ul>
+                    <li><a onclick="scrollToSection('hero')">Hero Spotlight</a></li>
+                    <li><a onclick="scrollToSection('trending')">Top 10 Ranked</a></li>
+                    <li><a onclick="scrollToSection('explore')">Genre Catalog</a></li>
+                    <li><a onclick="scrollToSection('series')">Original Series</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Legal & Info</h4>
+                <ul>
+                    <li><a onclick="showToast('Privacy Policy: All data stored locally.')">Privacy Policy</a></li>
+                    <li><a onclick="showToast('Terms of Use: 100% Free streaming hub.')">Terms of Use</a></li>
+                    <li><a onclick="showToast('DMCA Policy: Content provided for indexing.')">DMCA Notice</a></li>
+                    <li><a onclick="openSocialModal()">Contact @_beat_labs</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>&copy; 2026 WaveMirror. 100% Free. Powered by TMDB API & @_beat_labs.</span>
+            <span>v3.0 TMDB Stream Engine</span>
+        </div>
+    </footer>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

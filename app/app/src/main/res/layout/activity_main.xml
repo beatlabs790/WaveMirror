@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark">
+
+    <!-- SwipeRefreshLayout for Pull to Refresh -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <!-- Main WebView -->
+        <WebView
+            android:id="@+id/webView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- Fullscreen Video Container for Movies & Trailers -->
+    <FrameLayout
+        android:id="@+id/customViewContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:visibility="gone" />
+
+    <!-- Dark Glass Splash / Loading Layout with WaveMirror Logo -->
+    <RelativeLayout
+        android:id="@+id/splashOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg_dark"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/splashLogo"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/logo"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:contentDescription="WaveMirror Logo" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_below="@id/splashLogo"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="24dp"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/primary_cyan" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/progressBar"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:text="WaveMirror"
+            android:textColor="@color/text_main"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.05" />
+
+    </RelativeLayout>
+
+</RelativeLayout>
