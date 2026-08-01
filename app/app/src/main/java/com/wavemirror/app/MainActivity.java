@@ -70,12 +70,16 @@ public class MainActivity extends AppCompatActivity {
         settings.setSupportZoom(false);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
+        // Native Popup & Ad Shield Settings
+        settings.setJavaScriptCanOpenWindowsAutomatically(false);
+        settings.setSupportMultipleWindows(false);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
             CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
         }
 
-        // WebView Client for In-App Navigation
+        // WebView Client for In-App Navigation & Popup Blocking
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
@@ -95,6 +99,21 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                String url = request.getUrl().toString();
+                // Block external ad domain popups/redirects that attempt to navigate away from WaveMirror
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    if (url.contains("wavemirror") || url.contains("vidsrc") || url.contains("autoembed") || url.contains("youtube")) {
+                        return false; // Allow legitimate stream hosts
+                    } else {
+                        Toast.makeText(MainActivity.this, "🛡️ External Ad Redirect Blocked", Toast.LENGTH_SHORT).show();
+                        return true; // Block ad redirect
+                    }
+                }
+                return false;
+            }
+
+            @Override
             public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
                 if (request.isForMainFrame()) {
@@ -103,8 +122,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // WebChromeClient for Fullscreen Video Playback (Movies & Trailers)
+        // WebChromeClient with Built-In Popup Protection & Fullscreen Video Playback
         webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
+                // Block all script-created popup windows automatically
+                Toast.makeText(MainActivity.this, "🛡️ Ad Popup Window Blocked", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+
             @Override
             public void onShowCustomView(View view, CustomViewCallback callback) {
                 if (customView != null) {

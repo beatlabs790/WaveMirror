@@ -1,4 +1,4 @@
-// WaveMirror Application Engine - Powered by OMDb API (apikey: a09b85fe)
+// WaveMirror Application Engine - Powered by TMDB API (apikey: fea469f5e20796590292a227a92a2fef)
 
 let currentCatalog = [...FEATURED_MOVIES];
 let activeGenre = "All";
@@ -7,11 +7,33 @@ let heroSlideIndex = 0;
 let heroTimer = null;
 let searchDebounce = null;
 
-// Global Stream State
+// Global Stream & Shield State
 window.currentId = null;
 window.currentType = "movie";
 window.currentImdb = null;
 window.currentServer = 1;
+let blockedPopupsCount = 0;
+
+// Global Ad & Popup Shield Override (Blocks window.open popups)
+window.open = function(url, target, features) {
+    blockedPopupsCount++;
+    console.warn(`[Shield] Intercepted popup #${blockedPopupsCount} attempt to: ${url}`);
+    const statusText = document.getElementById("shieldStatus");
+    if (statusText) {
+        statusText.innerText = `🛡️ Popup Shield Active (${blockedPopupsCount} Ad Popups Intercepted)`;
+    }
+    showToast("🛡️ Ad Popup Intercepted");
+    return null;
+};
+
+// Automatic Focus Guard (Prevents external tabs from taking window focus)
+window.addEventListener("blur", () => {
+    if (document.activeElement && document.activeElement.tagName === "IFRAME") {
+        setTimeout(() => {
+            window.focus();
+        }, 150);
+    }
+});
 
 // Initialize App
 document.addEventListener("DOMContentLoaded", () => {
@@ -76,7 +98,7 @@ function renderHeroSlider() {
             <img class="hero-backdrop" src="${movie.backdrop}" alt="${movie.title}" loading="${idx === 0 ? 'eager' : 'lazy'}">
             <div class="hero-overlay"></div>
             <div class="hero-content">
-                <span class="hero-tag">OMDB FEATURED ${movie.type.toUpperCase()}</span>
+                <span class="hero-tag">TMDB FEATURED ${movie.type.toUpperCase()}</span>
                 <h1 class="hero-title">${movie.title}</h1>
                 <div class="hero-meta">
                     <span class="rating-imdb">★ ${movie.rating}</span>
@@ -86,7 +108,7 @@ function renderHeroSlider() {
                 </div>
                 <p class="hero-overview">${movie.overview}</p>
                 <div class="hero-actions">
-                    <button class="btn-primary" onclick="openPlayerModal('${movie.imdbID || movie.id}', '${movie.type}')">
+                    <button class="btn-primary" onclick="openPlayerModal('${movie.id}', '${movie.type}')">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                         Play Free Stream
                     </button>
@@ -130,7 +152,7 @@ function renderTop10Rail(list = currentCatalog) {
 
     const top10Items = list.slice(0, 10);
     rail.innerHTML = top10Items.map((movie, idx) => `
-        <div class="top10-card" onclick="openPlayerModal('${movie.imdbID || movie.id}', '${movie.type}')">
+        <div class="top10-card" onclick="openPlayerModal('${movie.id}', '${movie.type}')">
             <span class="rank-number">${idx + 1}</span>
             <div class="movie-card" style="margin-left: 15px;">
                 <div class="poster-wrapper">
@@ -207,7 +229,7 @@ function renderSeriesGrid(seriesList = null) {
 
 function createMovieCardHTML(movie) {
     return `
-        <div class="movie-card" onclick="openPlayerModal('${movie.imdbID || movie.id}', '${movie.type || 'movie'}')">
+        <div class="movie-card" onclick="openPlayerModal('${movie.id}', '${movie.type || 'movie'}')">
             <div class="poster-wrapper">
                 <img class="poster-img" src="${movie.poster}" alt="${movie.title}" loading="lazy">
                 <span class="card-badge-top">★ ${movie.rating}</span>
@@ -229,7 +251,7 @@ function createMovieCardHTML(movie) {
     `;
 }
 
-/* ---------------- Predictive Real-Time OMDb Search ---------------- */
+/* ---------------- Predictive Real-Time TMDB Search ---------------- */
 function handleSearch(event) {
     const query = event.target.value.trim();
     clearTimeout(searchDebounce);
@@ -245,14 +267,14 @@ function handleSearch(event) {
         const searchResults = await fetchLiveSearch(query);
         showLoader(false);
         
-        document.getElementById("exploreHeaderTitle").innerText = `OMDb Search: "${query}"`;
+        document.getElementById("exploreHeaderTitle").innerText = `TMDB Search: "${query}"`;
         scrollToSection('explore');
         renderMovieGrid(searchResults);
     }, 400);
 }
 
-/* ---------------- In-App Player & vidsrc Stream Engine (NO NEW TABS) ---------------- */
-async function openPlayerModal(imdbID, mediaType = "movie") {
+/* ---------------- In-App Player & vidsrc Stream Engine ---------------- */
+async function openPlayerModal(id, mediaType = "movie") {
     const modal = document.getElementById("playerModal");
     const iframe = document.getElementById("playerIframe");
     const title = document.getElementById("modalTitle");
@@ -262,19 +284,18 @@ async function openPlayerModal(imdbID, mediaType = "movie") {
     modal.classList.add("active");
     document.body.style.overflow = "hidden";
     title.innerText = "Loading stream...";
-    overview.innerText = "Connecting to OMDb API & stream servers...";
+    overview.innerText = "Connecting to TMDB API & stream servers...";
 
-    window.currentId = imdbID;
-    window.currentImdb = imdbID;
+    window.currentId = id;
     window.currentType = mediaType;
     window.currentServer = 1;
 
-    // Fetch full OMDb API details by IMDb ID
-    let movie = await fetchStreamDetails(imdbID, mediaType);
+    let movie = await fetchStreamDetails(id, mediaType);
     if (!movie) {
-        movie = currentCatalog.find(m => m.imdbID === imdbID || m.id === imdbID) || FEATURED_MOVIES[0];
+        movie = currentCatalog.find(m => m.id == id) || FEATURED_MOVIES[0];
     }
     activeMovie = movie;
+    window.currentImdb = movie.imdbId || movie.id;
 
     const year = document.getElementById("modalYear");
     const rating = document.getElementById("modalRating");
@@ -293,7 +314,6 @@ async function openPlayerModal(imdbID, mediaType = "movie") {
     cast.innerText = movie.cast ? movie.cast.join(", ") : "Lead Actor";
     genres.innerText = movie.genres ? movie.genres.join(" • ") : "Action";
 
-    // Setup TV controls vs Movie Server Switcher
     if (mediaType === "tv" || movie.type === "tv") {
         tvControls.style.display = "flex";
         tvControls.classList.remove("hidden");
@@ -330,6 +350,7 @@ function loadServer(num, btnElement) {
     if (!iframe) return;
 
     const imdb = window.currentImdb || "tt15239678";
+    const tmdbId = window.currentId || "693134";
 
     if (window.currentType === "tv") {
         updateTvStream();
@@ -339,9 +360,9 @@ function loadServer(num, btnElement) {
         } else if (num === 2) {
             iframe.src = `https://vidsrc.xyz/embed/movie/${imdb}`;
         } else if (num === 3) {
-            iframe.src = `https://vidsrc.to/embed/movie/${imdb}`;
+            iframe.src = `https://vidsrc.to/embed/movie/${tmdbId}`;
         } else {
-            iframe.src = `https://autoembed.to/movie/imdb/${imdb}`;
+            iframe.src = `https://autoembed.to/movie/tmdb/${tmdbId}`;
         }
     }
 
@@ -350,6 +371,18 @@ function loadServer(num, btnElement) {
         buttons.forEach(b => b.classList.remove("active"));
         btnElement.classList.add("active");
     }
+}
+
+// 1-Click Close Ad Overlay / Refresh Stream Cleanly
+function closeAdOverlay() {
+    const iframe = document.getElementById("playerIframe");
+    if (!iframe) return;
+    const currentSrc = iframe.src;
+    iframe.src = "about:blank";
+    setTimeout(() => {
+        iframe.src = currentSrc;
+        showToast("⚡ Player Cleaned & Ad Overlay Cleared");
+    }, 100);
 }
 
 function generateSeasonEpisodeDropdowns(seasonsCount) {
@@ -364,7 +397,7 @@ function updateTvStream() {
     const s = document.getElementById("seasonSelect").value || 1;
     const e = document.getElementById("episodeSelect").value || 1;
     const iframe = document.getElementById("playerIframe");
-    const id = window.currentImdb || "tt0944947";
+    const id = window.currentId || "1399";
     const sNum = window.currentServer || 1;
 
     if (sNum === 1) {
@@ -374,7 +407,7 @@ function updateTvStream() {
     } else if (sNum === 3) {
         iframe.src = `https://vidsrc.to/embed/tv/${id}/${s}/${e}`;
     } else {
-        iframe.src = `https://autoembed.to/tv/imdb/${id}-${s}-${e}`;
+        iframe.src = `https://autoembed.to/tv/tmdb/${id}-${s}-${e}`;
     }
 }
 
@@ -399,7 +432,7 @@ function updateModalWatchlistBtn() {
     if (!btn || !activeMovie) return;
     const inList = isInWatchlist(activeMovie.id);
     btn.innerText = inList ? "✓ Saved to Watchlist" : "+ Add to Watchlist";
-    btn.style.background = inList ? "rgba(0, 242, 254, 0.2)" : "linear-gradient(135deg, var(--primary-cyan), var(--primary-blue))";
+    btn.style.background = inList ? "rgba(255, 42, 95, 0.2)" : "linear-gradient(135deg, var(--primary-neon), var(--primary-violet))";
 }
 
 function toggleWatchlistFromHero(id) {
@@ -451,7 +484,7 @@ function updateWatchlistUI() {
                 <div style="font-size: 0.75rem; color: var(--text-muted);">${item.year} • ${item.quality || '4K'}</div>
                 <button class="remove-btn" style="margin-top: 0.4rem;" onclick="removeWatchlistItem('${item.id}')">Remove</button>
             </div>
-            <button class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="openPlayerModal('${item.imdbID || item.id}', '${item.type || 'movie'}')">Play</button>
+            <button class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="openPlayerModal('${item.id}', '${item.type || 'movie'}')">Play</button>
         </div>
     `).join('');
 }
@@ -495,7 +528,7 @@ function showToast(message) {
     const toast = document.createElement("div");
     toast.className = "toast";
     toast.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary-cyan)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary-neon)" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         <span>${message}</span>
     `;
 

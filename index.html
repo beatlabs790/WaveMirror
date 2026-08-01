@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WaveMirror | Free Cinema & Series Streaming</title>
-    <meta name="description" content="WaveMirror - Stream top trending movies, 4K HDR series, original blockbusters, and live trailers 100% free with zero ads or tab popups. Powered by TMDB API.">
+    <meta name="description" content="WaveMirror - Stream top trending movies, 4K HDR series, original blockbusters, and live trailers 100% free with built-in popup & ad shield. Powered by TMDB API.">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Global Loader -->
     <div id="global-loader">
         <div class="loader-spinner"></div>
-        <p style="font-size: 0.9rem; font-weight: 600; color: var(--primary-cyan); letter-spacing: 1px;">LOADING WAVEMIRROR...</p>
+        <p style="font-size: 0.9rem; font-weight: 600; color: var(--primary-neon); letter-spacing: 1px;">LOADING WAVEMIRROR...</p>
     </div>
 
     <!-- Navigation Bar -->
@@ -20,7 +20,7 @@
             <a class="brand-logo" onclick="scrollToSection('hero')">
                 <img src="9dff5f12-e1c4-4575-81f4-5184844ca983.png" alt="WaveMirror Logo" class="brand-logo-img">
                 <span class="brand-title">WaveMirror</span>
-                <span class="brand-badge" style="background: linear-gradient(90deg, #00f2fe, #4facfe); color: #000;">100% FREE</span>
+                <span class="brand-badge">100% FREE</span>
             </a>
             <ul class="nav-links">
                 <li><a class="nav-link active" onclick="scrollToSection('hero')">Home</a></li>
@@ -71,7 +71,7 @@
                 <div class="section-header">
                     <div>
                         <h2 class="section-title">Top 10 Trending Today</h2>
-                        <p class="section-subtitle">Most watched movies and shows right now on WaveMirror - Powered by TMDB API</p>
+                        <p class="section-subtitle">Most watched movies and shows right now on WaveMirror - 100% Free</p>
                     </div>
                 </div>
                 <div class="top10-grid" id="top10Grid">
@@ -193,8 +193,8 @@
                         <div class="faq-answer">Yes! WaveMirror is 100% free with no paid subscriptions, credit cards, or accounts required.</div>
                     </div>
                     <div class="faq-item" onclick="toggleFaq(this)">
-                        <div class="faq-question"><span>How do I switch servers or episodes?</span> <span>+</span></div>
-                        <div class="faq-answer">In the player modal, click Server 1 (vidsrc.pm), Server 2 (vidsrc.xyz), or Server 3 (vidsrc.to). For TV series, use the Season & Episode dropdowns to switch episodes instantly!</div>
+                        <div class="faq-question"><span>How does built-in Ad & Popup Shield work?</span> <span>+</span></div>
+                        <div class="faq-answer">WaveMirror actively intercepts window popups and auto-refocuses your stream. If an ad overlay appears inside a video server, click 'Clear Ad Overlay' to reset it instantly without stopping your movie!</div>
                     </div>
                     <div class="faq-item" onclick="toggleFaq(this)">
                         <div class="faq-question"><span>Why doesn't WaveMirror open new browser tabs?</span> <span>+</span></div>
@@ -205,22 +205,36 @@
         </div>
     </main>
 
-    <!-- In-App Streaming Player & Movie Details Modal -->
+    <!-- In-App Streaming Player & Movie Details Modal (UNRESTRICTED IFRAME STREAM ENGINE) -->
     <div class="modal-backdrop" id="playerModal">
         <div class="modal-box">
             <button class="modal-close-btn" onclick="closePlayerModal()">&times;</button>
+
+            <!-- Built-in Ad & Popup Shield Header Bar -->
+            <div class="shield-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 1.2rem; background: rgba(255, 42, 95, 0.08); border-bottom: 1px solid var(--border-glass); flex-wrap: wrap; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--primary-neon); font-weight: 700;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span id="shieldStatus">🛡️ Popup Shield Active (External Popups Intercepted)</span>
+                </div>
+                <button class="btn-secondary" style="padding: 0.3rem 0.75rem; font-size: 0.75rem; border-color: var(--primary-neon);" onclick="closeAdOverlay()">
+                    ⚡ Clear Ad Overlay / Refresh Stream
+                </button>
+            </div>
+
             <div class="player-wrapper" id="playerWrapper">
+                <!-- Unrestricted iframe playback allowing vidsrc stream engine to load natively -->
                 <iframe class="player-iframe" id="playerIframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
+
             <div class="modal-details">
                 <!-- TV Series Controls (Season & Episode Selectors) -->
                 <div id="tvControls" class="tv-controls-bar hidden" style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary-cyan);">Season:</label>
+                        <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary-neon);">Season:</label>
                         <select id="seasonSelect" onchange="updateTvStream()" class="select-dropdown"></select>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary-cyan);">Episode:</label>
+                        <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary-neon);">Episode:</label>
                         <select id="episodeSelect" onchange="updateTvStream()" class="select-dropdown"></select>
                     </div>
                 </div>
@@ -229,7 +243,7 @@
                     <div class="server-switcher" id="serverSwitcher" style="margin-bottom: 0;">
                         <!-- Dynamic server buttons injected here -->
                     </div>
-                    <span style="font-size: 0.75rem; color: var(--primary-cyan); font-weight: 600;">▶ Tip: Switch servers if a stream is buffering</span>
+                    <span style="font-size: 0.75rem; color: var(--primary-neon); font-weight: 600;">▶ Tip: Switch servers if a stream buffers</span>
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
@@ -247,7 +261,7 @@
                 <div style="display: flex; gap: 2rem; font-size: 0.9rem; color: var(--text-muted); flex-wrap: wrap;">
                     <div><strong>Director:</strong> <span id="modalDirector" style="color: #fff;">-</span></div>
                     <div><strong>Cast:</strong> <span id="modalCast" style="color: #fff;">-</span></div>
-                    <div><strong>Genres:</strong> <span id="modalGenres" style="color: var(--primary-cyan);">-</span></div>
+                    <div><strong>Genres:</strong> <span id="modalGenres" style="color: var(--primary-neon);">-</span></div>
                 </div>
             </div>
         </div>
@@ -264,7 +278,7 @@
             <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.4rem 0 1.5rem;">Official WaveMirror Creator & Audio Tech Labs</p>
             <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem;">
                 <div style="background: rgba(255, 255, 255, 0.06); padding: 0.8rem 1.2rem; border-radius: var(--radius-sm);">
-                    <div style="font-weight: 800; font-size: 1.2rem; color: var(--primary-cyan);">148K</div>
+                    <div style="font-weight: 800; font-size: 1.2rem; color: var(--primary-neon);">148K</div>
                     <div style="font-size: 0.75rem; color: var(--text-muted);">FOLLOWERS</div>
                 </div>
                 <div style="background: rgba(255, 255, 255, 0.06); padding: 0.8rem 1.2rem; border-radius: var(--radius-sm);">
@@ -300,7 +314,7 @@
                     <img src="9dff5f12-e1c4-4575-81f4-5184844ca983.png" alt="WaveMirror Logo" class="brand-logo-img">
                     <span class="brand-title">WaveMirror</span>
                 </div>
-                <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">Next-gen movie streaming platform powered by TMDB API. Tab-free immersion.</p>
+                <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5;">Next-gen movie streaming platform with built-in ad & popup shield. Powered by TMDB API.</p>
             </div>
             <div class="footer-col">
                 <h4>Navigation</h4>
@@ -322,8 +336,8 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <span>&copy; 2026 WaveMirror. 100% Free. Powered by TMDB API & @_beat_labs.</span>
-            <span>v3.0 TMDB Stream Engine</span>
+            <span>&copy; 2026 WaveMirror. 100% Free with Ad Shield. Powered by TMDB API & @_beat_labs.</span>
+            <span>v3.3 Native Stream Engine</span>
         </div>
     </footer>
 
