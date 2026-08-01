@@ -1,4 +1,4 @@
-// WaveMirror Application Engine - Authentic TMDB API & vidsrc Stream Engine
+// WaveMirror Application Engine - Powered by OMDb API (apikey: a09b85fe)
 
 let currentCatalog = [...FEATURED_MOVIES];
 let activeGenre = "All";
@@ -76,17 +76,17 @@ function renderHeroSlider() {
             <img class="hero-backdrop" src="${movie.backdrop}" alt="${movie.title}" loading="${idx === 0 ? 'eager' : 'lazy'}">
             <div class="hero-overlay"></div>
             <div class="hero-content">
-                <span class="hero-tag">TMDB TRENDING ${movie.type.toUpperCase()}</span>
+                <span class="hero-tag">OMDB FEATURED ${movie.type.toUpperCase()}</span>
                 <h1 class="hero-title">${movie.title}</h1>
                 <div class="hero-meta">
                     <span class="rating-imdb">★ ${movie.rating}</span>
                     <span class="meta-badge">${movie.year}</span>
-                    <span class="meta-badge">${movie.quality}</span>
+                    <span class="meta-badge">${movie.quality || '4K'}</span>
                     <span>${movie.duration}</span>
                 </div>
                 <p class="hero-overview">${movie.overview}</p>
                 <div class="hero-actions">
-                    <button class="btn-primary" onclick="openPlayerModal('${movie.id}', '${movie.type}')">
+                    <button class="btn-primary" onclick="openPlayerModal('${movie.imdbID || movie.id}', '${movie.type}')">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                         Play Free Stream
                     </button>
@@ -130,12 +130,12 @@ function renderTop10Rail(list = currentCatalog) {
 
     const top10Items = list.slice(0, 10);
     rail.innerHTML = top10Items.map((movie, idx) => `
-        <div class="top10-card" onclick="openPlayerModal('${movie.id}', '${movie.type}')">
+        <div class="top10-card" onclick="openPlayerModal('${movie.imdbID || movie.id}', '${movie.type}')">
             <span class="rank-number">${idx + 1}</span>
             <div class="movie-card" style="margin-left: 15px;">
                 <div class="poster-wrapper">
                     <img class="poster-img" src="${movie.poster}" alt="${movie.title}" loading="lazy">
-                    <span class="card-quality-badge">${movie.quality}</span>
+                    <span class="card-quality-badge">${movie.quality || '4K'}</span>
                     <div class="card-overlay">
                         <div class="play-icon-btn">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -207,7 +207,7 @@ function renderSeriesGrid(seriesList = null) {
 
 function createMovieCardHTML(movie) {
     return `
-        <div class="movie-card" onclick="openPlayerModal('${movie.id}', '${movie.type || 'movie'}')">
+        <div class="movie-card" onclick="openPlayerModal('${movie.imdbID || movie.id}', '${movie.type || 'movie'}')">
             <div class="poster-wrapper">
                 <img class="poster-img" src="${movie.poster}" alt="${movie.title}" loading="lazy">
                 <span class="card-badge-top">★ ${movie.rating}</span>
@@ -229,7 +229,7 @@ function createMovieCardHTML(movie) {
     `;
 }
 
-/* ---------------- Predictive Real-Time API Search ---------------- */
+/* ---------------- Predictive Real-Time OMDb Search ---------------- */
 function handleSearch(event) {
     const query = event.target.value.trim();
     clearTimeout(searchDebounce);
@@ -245,14 +245,14 @@ function handleSearch(event) {
         const searchResults = await fetchLiveSearch(query);
         showLoader(false);
         
-        document.getElementById("exploreHeaderTitle").innerText = `Search: "${query}"`;
+        document.getElementById("exploreHeaderTitle").innerText = `OMDb Search: "${query}"`;
         scrollToSection('explore');
         renderMovieGrid(searchResults);
     }, 400);
 }
 
 /* ---------------- In-App Player & vidsrc Stream Engine (NO NEW TABS) ---------------- */
-async function openPlayerModal(movieId, mediaType = "movie") {
+async function openPlayerModal(imdbID, mediaType = "movie") {
     const modal = document.getElementById("playerModal");
     const iframe = document.getElementById("playerIframe");
     const title = document.getElementById("modalTitle");
@@ -262,19 +262,19 @@ async function openPlayerModal(movieId, mediaType = "movie") {
     modal.classList.add("active");
     document.body.style.overflow = "hidden";
     title.innerText = "Loading stream...";
-    overview.innerText = "Connecting to TMDB API & stream servers...";
+    overview.innerText = "Connecting to OMDb API & stream servers...";
 
-    window.currentId = movieId;
+    window.currentId = imdbID;
+    window.currentImdb = imdbID;
     window.currentType = mediaType;
     window.currentServer = 1;
 
-    // Fetch full stream details & IMDB ID
-    let movie = await fetchStreamDetails(movieId, mediaType);
+    // Fetch full OMDb API details by IMDb ID
+    let movie = await fetchStreamDetails(imdbID, mediaType);
     if (!movie) {
-        movie = currentCatalog.find(m => m.id == movieId || m.tmdbId == movieId) || FEATURED_MOVIES[0];
+        movie = currentCatalog.find(m => m.imdbID === imdbID || m.id === imdbID) || FEATURED_MOVIES[0];
     }
     activeMovie = movie;
-    window.currentImdb = movie.imdbId || "tt15239678";
 
     const year = document.getElementById("modalYear");
     const rating = document.getElementById("modalRating");
@@ -294,7 +294,7 @@ async function openPlayerModal(movieId, mediaType = "movie") {
     genres.innerText = movie.genres ? movie.genres.join(" • ") : "Action";
 
     // Setup TV controls vs Movie Server Switcher
-    if (mediaType === "tv") {
+    if (mediaType === "tv" || movie.type === "tv") {
         tvControls.style.display = "flex";
         tvControls.classList.remove("hidden");
         generateSeasonEpisodeDropdowns(movie.seasonsCount || 1);
@@ -330,7 +330,6 @@ function loadServer(num, btnElement) {
     if (!iframe) return;
 
     const imdb = window.currentImdb || "tt15239678";
-    const tmdbId = window.currentId || "693134";
 
     if (window.currentType === "tv") {
         updateTvStream();
@@ -340,9 +339,9 @@ function loadServer(num, btnElement) {
         } else if (num === 2) {
             iframe.src = `https://vidsrc.xyz/embed/movie/${imdb}`;
         } else if (num === 3) {
-            iframe.src = `https://vidsrc.to/embed/movie/${tmdbId}`;
+            iframe.src = `https://vidsrc.to/embed/movie/${imdb}`;
         } else {
-            iframe.src = `https://autoembed.to/movie/tmdb/${tmdbId}`;
+            iframe.src = `https://autoembed.to/movie/imdb/${imdb}`;
         }
     }
 
@@ -365,7 +364,7 @@ function updateTvStream() {
     const s = document.getElementById("seasonSelect").value || 1;
     const e = document.getElementById("episodeSelect").value || 1;
     const iframe = document.getElementById("playerIframe");
-    const id = window.currentId || "66732";
+    const id = window.currentImdb || "tt0944947";
     const sNum = window.currentServer || 1;
 
     if (sNum === 1) {
@@ -375,7 +374,7 @@ function updateTvStream() {
     } else if (sNum === 3) {
         iframe.src = `https://vidsrc.to/embed/tv/${id}/${s}/${e}`;
     } else {
-        iframe.src = `https://autoembed.to/tv/tmdb/${id}-${s}-${e}`;
+        iframe.src = `https://autoembed.to/tv/imdb/${id}-${s}-${e}`;
     }
 }
 
@@ -452,7 +451,7 @@ function updateWatchlistUI() {
                 <div style="font-size: 0.75rem; color: var(--text-muted);">${item.year} • ${item.quality || '4K'}</div>
                 <button class="remove-btn" style="margin-top: 0.4rem;" onclick="removeWatchlistItem('${item.id}')">Remove</button>
             </div>
-            <button class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="openPlayerModal('${item.id}', '${item.type || 'movie'}')">Play</button>
+            <button class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="openPlayerModal('${item.imdbID || item.id}', '${item.type || 'movie'}')">Play</button>
         </div>
     `).join('');
 }
