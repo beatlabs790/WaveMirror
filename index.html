@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WaveMirror | Free Cinema & Series Streaming</title>
     <meta name="description" content="WaveMirror - Stream top trending movies, 4K HDR series, original blockbusters, and live trailers 100% free with built-in popup & ad shield. Powered by TMDB API.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <!-- Global Loader -->
     <div id="global-loader">
         <div class="loader-spinner"></div>
-        <p style="font-size: 0.9rem; font-weight: 600; color: var(--primary-neon); letter-spacing: 1px;">LOADING WAVEMIRROR...</p>
+        <p style="font-size: 0.9rem; font-weight: 600; color: #FFD700; letter-spacing: 1px;">LOADING WAVEMIRROR...</p>
     </div>
 
     <!-- Navigation Bar -->
@@ -20,7 +23,7 @@
             <a class="brand-logo" onclick="scrollToSection('hero')">
                 <img src="9dff5f12-e1c4-4575-81f4-5184844ca983.png" alt="WaveMirror Logo" class="brand-logo-img">
                 <span class="brand-title">WaveMirror</span>
-                <span class="brand-badge">100% FREE</span>
+                <span class="brand-badge" style="background: linear-gradient(135deg, #FFD700, #FFA500); color: #000;">100% FREE</span>
             </a>
             <ul class="nav-links">
                 <li><a class="nav-link active" onclick="scrollToSection('hero')">Home</a></li>
@@ -29,6 +32,7 @@
                 <li><a class="nav-link" onclick="scrollToSection('series')">TV Series</a></li>
                 <li><a class="nav-link" onclick="scrollToSection('upcoming')">Upcoming</a></li>
                 <li><a class="nav-link" onclick="scrollToSection('free-pass')">Free Pass</a></li>
+                <li><a class="nav-link" onclick="scrollToSection('download-app')">Download App</a></li>
             </ul>
         </div>
 
@@ -53,6 +57,40 @@
         </div>
     </header>
 
+    <!-- Platform Filter Bar -->
+    <div class="platform-filter-bar" id="platformFilterBar">
+        <div class="platform-filter-scroll">
+            <button class="platform-pill active" onclick="filterPlatform('Trending', this)">
+                <span class="platform-dot" style="background: #FFD700;"></span>
+                <span>Trending</span>
+            </button>
+            <button class="platform-pill" onclick="filterPlatform('Latest Release', this)">
+                <span class="platform-dot" style="background: #00e676;"></span>
+                <span>Latest Release</span>
+            </button>
+            <button class="platform-pill" onclick="filterPlatform('Netflix', this)">
+                <span class="platform-dot" style="background: #e50914;"></span>
+                <span>Netflix</span>
+            </button>
+            <button class="platform-pill" onclick="filterPlatform('Prime Video', this)">
+                <span class="platform-dot" style="background: #00a8e1;"></span>
+                <span>Prime Video</span>
+            </button>
+            <button class="platform-pill" onclick="filterPlatform('Hotstar', this)">
+                <span class="platform-dot" style="background: #1f80e0;"></span>
+                <span>Hotstar</span>
+            </button>
+            <button class="platform-pill" onclick="filterPlatform('Crunchyroll', this)">
+                <span class="platform-dot" style="background: #f47521;"></span>
+                <span>Crunchyroll</span>
+            </button>
+            <button class="platform-pill" onclick="filterPlatform('Kids', this)">
+                <span class="platform-dot" style="background: #ff69b4;"></span>
+                <span>Kids</span>
+            </button>
+        </div>
+    </div>
+
     <!-- Main Content Body -->
     <main>
         <!-- Hero Spotlight Slider Section -->
@@ -65,7 +103,40 @@
             </div>
         </section>
 
+        <!-- App Download Strip -->
+        <div class="app-download-strip">
+            <div class="app-download-inner">
+                <div class="app-download-text">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                    <span>Get the <strong>WaveMirror App</strong> — Stream anywhere, anytime!</span>
+                </div>
+                <div class="app-download-buttons">
+                    <a href="https://github.com/beatlabs790/WaveMirror/releases/download/v1.0.0/WaveMirror-Signed.apk" download class="app-download-btn apk-btn" onclick="showToast('Starting WaveMirror APK download...')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 2.047l-2.058 3.563c1.612.879 2.74 2.348 3.054 4.09H5.481c.313-1.742 1.441-3.211 3.054-4.09L6.477 2.047a.5.5 0 01.868-.496L9.449 5.15A8.003 8.003 0 0112 4.5c.897 0 1.756.148 2.551.65l2.104-3.599a.5.5 0 01.868.496zM5 11.7v6.8A1.5 1.5 0 006.5 20h1V23.5a1.5 1.5 0 003 0V20h3v3.5a1.5 1.5 0 003 0V20h1a1.5 1.5 0 001.5-1.5v-6.8H5zm-2.5 0A1.5 1.5 0 001 13.2v4.6a1.5 1.5 0 003 0v-4.6a1.5 1.5 0 00-1.5-1.5zm19 0a1.5 1.5 0 00-1.5 1.5v4.6a1.5 1.5 0 003 0v-4.6a1.5 1.5 0 00-1.5-1.5z"/></svg>
+                        <span>Download APK</span>
+                    </a>
+                    <a href="https://t.me/wavemirror" target="_blank" rel="noopener" class="app-download-btn telegram-btn" onclick="showToast('Joining Telegram channel...')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0h-.056zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.479.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                        <span>Telegram Channel</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <div class="main-container">
+            <!-- Continue Watching Section -->
+            <section id="continueWatching" style="margin-bottom: 3.5rem; display: none;">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">Continue Watching</h2>
+                        <p class="section-subtitle">Pick up right where you left off</p>
+                    </div>
+                </div>
+                <div class="movie-grid" id="continueWatchingGrid">
+                    <!-- Continue watching cards populated by JS -->
+                </div>
+            </section>
+
             <!-- Top 10 Trending Rail Section -->
             <section style="margin-bottom: 3.5rem;" id="trending">
                 <div class="section-header">
@@ -81,10 +152,44 @@
 
             <!-- Genre & Catalog Explorer Section -->
             <section id="explore" style="margin-bottom: 3.5rem;">
-                <div class="section-header">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: flex-wrap; gap: 1rem; margin-bottom: 1.5rem;">
                     <div>
                         <h2 class="section-title" id="exploreHeaderTitle">Explore Catalog</h2>
                         <p class="section-subtitle">Filter by your favorite genres and instant free titles</p>
+                    </div>
+                    
+                    <!-- Advanced Search & Discover Filters -->
+                    <div class="catalog-filters" style="display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center;">
+                        <select id="filterYear" onchange="triggerCatalogReload()" class="select-dropdown" style="padding: 0.4rem 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; outline: none;">
+                            <option value="All">All Years</option>
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                            <option value="2020">2020</option>
+                            <option value="2019">2019</option>
+                            <option value="2018">2018</option>
+                            <option value="2015">2015</option>
+                            <option value="2010">2010</option>
+                        </select>
+                        <select id="filterLang" onchange="triggerCatalogReload()" class="select-dropdown" style="padding: 0.4rem 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; outline: none;">
+                            <option value="All">All Languages</option>
+                            <option value="en">English</option>
+                            <option value="hi">Hindi (India)</option>
+                            <option value="ta">Tamil (India)</option>
+                            <option value="te">Telugu (India)</option>
+                            <option value="ja">Japanese</option>
+                            <option value="ko">Korean</option>
+                            <option value="es">Spanish</option>
+                            <option value="fr">French</option>
+                        </select>
+                        <select id="filterSort" onchange="triggerCatalogReload()" class="select-dropdown" style="padding: 0.4rem 0.8rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: #fff; font-size: 0.85rem; font-weight: 600; cursor: pointer; outline: none;">
+                            <option value="popularity.desc">Sort: Popular</option>
+                            <option value="vote_average.desc">Sort: Top Rated</option>
+                            <option value="primary_release_date.desc">Sort: Newest</option>
+                        </select>
                     </div>
                 </div>
 
@@ -179,6 +284,56 @@
                 </div>
             </section>
 
+            <!-- Download App Section -->
+            <section id="download-app" style="margin-bottom: 3.5rem;">
+                <div class="section-header" style="text-align: center; display: block;">
+                    <h2 class="section-title" style="justify-content: center;">Download WaveMirror App</h2>
+                    <p class="section-subtitle">Get the premium streaming experience directly on your Android phone or TV.</p>
+                </div>
+                <div class="glass-box" style="padding: 2.5rem; display: flex; align-items: center; justify-content: space-between; gap: 2rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 280px;">
+                        <h3 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 0.8rem; color: #fff;">WaveMirror v1.0.0 (Official Stable Release)</h3>
+                        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">
+                            Enjoy native fullscreen playback, built-in advanced ad blocking, instant server switching, and push notifications for new movie releases. Compiled and signed for Android devices.
+                        </p>
+                        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.5rem; color: var(--text-main); font-size: 0.9rem;">
+                            <li style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: #FFD700;">✔</span> Built-in Advanced Ad & Popup Shield
+                            </li>
+                            <li style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: #FFD700;">✔</span> Zero buffering native video renderer
+                            </li>
+                            <li style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: #FFD700;">✔</span> Lightweight APK with regular auto-updates
+                            </li>
+                        </ul>
+                        <a href="https://github.com/beatlabs790/WaveMirror/releases/download/v1.0.0/WaveMirror-Signed.apk" download class="btn-primary" style="display: inline-flex; text-decoration: none; padding: 0.8rem 1.8rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Download WaveMirror APK (Signed)
+                        </a>
+                    </div>
+                    <div style="flex: 0 1 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-glass); border-radius: var(--radius-md); padding: 2rem;">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="1.5" style="margin-bottom: 1rem;"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                        <span style="font-family: var(--font-heading); font-weight: 700; color: #fff; font-size: 1.1rem; margin-bottom: 0.4rem;">Scan to Download</span>
+                        <p style="color: var(--text-muted); font-size: 0.8rem; text-align: center; margin-bottom: 1rem;">Scan with your Android device to install the APK directly.</p>
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://github.com/beatlabs790/WaveMirror/releases/download/v1.0.0/WaveMirror-Signed.apk&color=ffd700&bgcolor=0a1628" alt="QR Code to Download APK" style="width: 130px; height: 130px; border: 4px solid var(--primary-gold); border-radius: 8px;">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Search CTA Section -->
+            <section class="search-cta-section" style="margin-bottom: 3.5rem;">
+                <div class="search-cta-box">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <h2 style="font-family: var(--font-heading); font-size: 1.6rem; color: #fff; margin: 0.8rem 0 0.4rem;">Can't find what you're looking for?</h2>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Search our entire catalog of movies and TV series instantly.</p>
+                    <button class="btn-primary" onclick="document.getElementById('searchInput').focus(); scrollToSection('navbar')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        Search Now
+                    </button>
+                </div>
+            </section>
+
             <!-- FAQ Section -->
             <section style="margin-bottom: 3.5rem;">
                 <div class="section-header">
@@ -211,12 +366,12 @@
             <button class="modal-close-btn" onclick="closePlayerModal()">&times;</button>
 
             <!-- Built-in Ad & Popup Shield Header Bar -->
-            <div class="shield-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 1.2rem; background: rgba(255, 42, 95, 0.08); border-bottom: 1px solid var(--border-glass); flex-wrap: wrap; gap: 0.5rem;">
-                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--primary-neon); font-weight: 700;">
+            <div class="shield-bar" style="display: flex; align-items: center; justify-content: space-between; padding: 0.6rem 1.2rem; background: rgba(255, 215, 0, 0.08); border-bottom: 1px solid var(--border-glass); flex-wrap: wrap; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: #FFD700; font-weight: 700;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     <span id="shieldStatus">🛡️ Popup Shield Active (External Popups Intercepted)</span>
                 </div>
-                <button class="btn-secondary" style="padding: 0.3rem 0.75rem; font-size: 0.75rem; border-color: var(--primary-neon);" onclick="closeAdOverlay()">
+                <button class="btn-secondary" style="padding: 0.3rem 0.75rem; font-size: 0.75rem; border-color: #FFD700;" onclick="closeAdOverlay()">
                     ⚡ Clear Ad Overlay / Refresh Stream
                 </button>
             </div>
@@ -228,22 +383,25 @@
 
             <div class="modal-details">
                 <!-- TV Series Controls (Season & Episode Selectors) -->
-                <div id="tvControls" class="tv-controls-bar hidden" style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">
+                <div id="tvControls" class="tv-controls-bar hidden" style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); flex-wrap: wrap;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary-neon);">Season:</label>
+                        <label style="font-size: 0.85rem; font-weight: 700; color: #FFD700;">Season:</label>
                         <select id="seasonSelect" onchange="updateTvStream()" class="select-dropdown"></select>
                     </div>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <label style="font-size: 0.85rem; font-weight: 700; color: var(--primary-neon);">Episode:</label>
+                        <label style="font-size: 0.85rem; font-weight: 700; color: #FFD700;">Episode:</label>
                         <select id="episodeSelect" onchange="updateTvStream()" class="select-dropdown"></select>
                     </div>
+                    <button class="btn-secondary" id="nextEpisodeBtn" onclick="playNextEpisode()" style="padding: 0.35rem 0.8rem; font-size: 0.8rem; border-color: var(--primary-gold); color: var(--primary-gold); font-weight: 700; display: inline-flex; align-items: center; gap: 0.3rem;">
+                        Next Episode ⏭
+                    </button>
                 </div>
 
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 1rem;">
                     <div class="server-switcher" id="serverSwitcher" style="margin-bottom: 0;">
                         <!-- Dynamic server buttons injected here -->
                     </div>
-                    <span style="font-size: 0.75rem; color: var(--primary-neon); font-weight: 600;">▶ Tip: Switch servers if a stream buffers</span>
+                    <span style="font-size: 0.75rem; color: #FFD700; font-weight: 600;">▶ Tip: Switch servers if a stream buffers</span>
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem;">
@@ -251,17 +409,50 @@
                         <h2 id="modalTitle" style="font-family: var(--font-heading); font-size: 2rem; font-weight: 800; color: #fff;">Movie Title</h2>
                         <div style="display: flex; gap: 1rem; color: var(--text-muted); font-size: 0.9rem; margin-top: 0.4rem;" id="modalMeta">
                             <span id="modalYear">2024</span>
-                            <span id="modalRating" style="color: var(--accent-gold); font-weight: 700;">★ 8.5</span>
+                            <span id="modalRating" style="color: #FFD700; font-weight: 700;">★ 8.5</span>
                             <span id="modalDuration">2h 46m</span>
                         </div>
                     </div>
-                    <button class="btn-primary" id="modalWatchlistBtn" onclick="handleModalWatchlistToggle()">+ Add to Watchlist</button>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button class="btn-secondary" id="modalTrailerBtn" onclick="playTrailer(window.currentId, window.currentType)" style="border-color: var(--primary-gold); color: var(--primary-gold); font-size: 0.85rem; padding: 0.5rem 1rem;">🎬 Trailer</button>
+                        <button class="btn-primary" id="modalWatchlistBtn" onclick="handleModalWatchlistToggle()" style="font-size: 0.85rem; padding: 0.5rem 1rem;">+ Add to Watchlist</button>
+                    </div>
                 </div>
                 <p id="modalOverview" style="color: #cbd5e1; line-height: 1.6; margin-bottom: 1.5rem;">Movie synopsis...</p>
-                <div style="display: flex; gap: 2rem; font-size: 0.9rem; color: var(--text-muted); flex-wrap: wrap;">
+                <div style="display: flex; gap: 2rem; font-size: 0.9rem; color: var(--text-muted); flex-wrap: wrap; margin-bottom: 1.5rem;">
                     <div><strong>Director:</strong> <span id="modalDirector" style="color: #fff;">-</span></div>
                     <div><strong>Cast:</strong> <span id="modalCast" style="color: #fff;">-</span></div>
-                    <div><strong>Genres:</strong> <span id="modalGenres" style="color: var(--primary-neon);">-</span></div>
+                    <div><strong>Genres:</strong> <span id="modalGenres" style="color: #FFD700;">-</span></div>
+                </div>
+
+                <!-- Reviews Section -->
+                <div style="border-top: 1px solid var(--border-glass); padding-top: 1.5rem; margin-top: 1.5rem;">
+                    <h3 style="font-family: var(--font-heading); font-size: 1.2rem; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        💬 User Reviews
+                    </h3>
+                    <div id="reviewsList" style="max-height: 250px; overflow-y: auto; padding-right: 0.5rem; margin-bottom: 1.5rem;">
+                        <!-- Reviews dynamic list -->
+                    </div>
+                    
+                    <!-- Write Review Form -->
+                    <form id="reviewForm" onsubmit="submitReview(event)" style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem;">
+                        <h4 style="font-family: var(--font-heading); font-size: 0.9rem; color: #fff; margin: 0;">Write a Review</h4>
+                        <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+                            <input type="text" id="reviewName" placeholder="Your Name" required style="flex: 1; min-width: 150px; padding: 0.45rem 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: #fff; font-size: 0.85rem; outline: none;">
+                            <div style="display: flex; align-items: center; gap: 0.4rem;">
+                                <label style="font-size: 0.8rem; color: var(--text-muted);">Rating:</label>
+                                <select id="reviewRating" style="padding: 0.45rem 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: #FFD700; font-size: 0.85rem; font-weight: 700; outline: none; cursor: pointer;">
+                                    <option value="5">⭐⭐⭐⭐⭐ (5/5)</option>
+                                    <option value="4">⭐⭐⭐⭐ (4/5)</option>
+                                    <option value="3">⭐⭐⭐ (3/5)</option>
+                                    <option value="2">⭐⭐ (2/5)</option>
+                                    <option value="1">⭐ (1/5)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <textarea id="reviewText" placeholder="Share your thoughts about this title..." required rows="2" style="width: 100%; padding: 0.45rem 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: #fff; font-size: 0.85rem; resize: vertical; outline: none;"></textarea>
+                        <button type="submit" class="btn-primary" style="align-self: flex-start; padding: 0.45rem 1.2rem; font-size: 0.8rem;">Submit Review</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -278,7 +469,7 @@
             <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.4rem 0 1.5rem;">Official WaveMirror Creator & Audio Tech Labs</p>
             <div style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem;">
                 <div style="background: rgba(255, 255, 255, 0.06); padding: 0.8rem 1.2rem; border-radius: var(--radius-sm);">
-                    <div style="font-weight: 800; font-size: 1.2rem; color: var(--primary-neon);">148K</div>
+                    <div style="font-weight: 800; font-size: 1.2rem; color: #FFD700;">148K</div>
                     <div style="font-size: 0.75rem; color: var(--text-muted);">FOLLOWERS</div>
                 </div>
                 <div style="background: rgba(255, 255, 255, 0.06); padding: 0.8rem 1.2rem; border-radius: var(--radius-sm);">
@@ -297,8 +488,18 @@
                 <span class="drawer-title">My Watchlist</span>
                 <button class="modal-close-btn" style="position: static; width: 32px; height: 32px; font-size: 1rem;" onclick="closeWatchlistDrawer()">&times;</button>
             </div>
-            <div class="drawer-content" id="watchlistContent">
+            <div class="drawer-content" id="watchlistContent" style="padding-bottom: 5rem;">
                 <!-- Saved watchlist items injected here -->
+            </div>
+            <!-- Backup Actions at the bottom -->
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: #060e1e; border-top: 1px solid var(--border-glass); padding: 1rem; display: flex; gap: 0.5rem; z-index: 10;">
+                <button class="btn-primary" onclick="exportWatchlist()" style="flex: 1; font-size: 0.75rem; padding: 0.5rem; justify-content: center; gap: 0.3rem;">
+                    💾 Export Backup
+                </button>
+                <button class="btn-secondary" onclick="triggerImportWatchlist()" style="flex: 1; font-size: 0.75rem; padding: 0.5rem; justify-content: center; gap: 0.3rem; border-color: var(--primary-gold); color: var(--primary-gold);">
+                    📥 Import Backup
+                </button>
+                <input type="file" id="watchlistImportFile" onchange="handleImportWatchlist(event)" accept=".json" style="display: none;">
             </div>
         </div>
     </div>
@@ -323,6 +524,7 @@
                     <li><a onclick="scrollToSection('trending')">Top 10 Ranked</a></li>
                     <li><a onclick="scrollToSection('explore')">Genre Catalog</a></li>
                     <li><a onclick="scrollToSection('series')">Original Series</a></li>
+                    <li><a onclick="scrollToSection('download-app')">Download App</a></li>
                 </ul>
             </div>
             <div class="footer-col">
@@ -332,6 +534,7 @@
                     <li><a onclick="showToast('Terms of Use: 100% Free streaming hub.')">Terms of Use</a></li>
                     <li><a onclick="showToast('DMCA Policy: Content provided for indexing.')">DMCA Notice</a></li>
                     <li><a onclick="openSocialModal()">Contact @_beat_labs</a></li>
+                    <li><a onclick="openAdminPanel()" style="color: var(--primary-gold); font-weight: 700;">🛡️ Manage Reviews (Admin)</a></li>
                 </ul>
             </div>
         </div>
@@ -340,6 +543,40 @@
             <span>v3.3 Native Stream Engine</span>
         </div>
     </footer>
+
+    <!-- Admin Reviews Moderation Modal -->
+    <div class="modal-backdrop" id="adminPanelModal">
+        <div class="modal-box" style="max-width: 500px; padding: 2rem;">
+            <button class="modal-close-btn" onclick="closeAdminPanel()">&times;</button>
+            
+            <!-- Login Stage -->
+            <div id="adminLoginSection">
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🛡️</div>
+                    <h2 style="font-family: var(--font-heading); font-size: 1.5rem; color: #fff; margin: 0;">Admin Moderation Panel</h2>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.3rem;">Authorize to moderate review submissions</p>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <input type="password" id="adminPassInput" placeholder="Enter Admin Password" style="width: 100%; padding: 0.6rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: #fff; font-size: 0.95rem; outline: none; text-align: center;">
+                    <button class="btn-primary" style="justify-content: center; padding: 0.6rem 1rem;" onclick="checkAdminPassword()">Login</button>
+                </div>
+            </div>
+            
+            <!-- Dashboard Stage -->
+            <div id="adminDashboardSection" style="display: none;">
+                <h2 style="font-family: var(--font-heading); font-size: 1.4rem; color: #fff; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    🛡️ Pending Submissions
+                </h2>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.2rem;">Approve or reject pending reviews below</p>
+                
+                <div id="adminReviewsList" style="max-height: 350px; overflow-y: auto; padding-right: 0.5rem; margin-bottom: 1.5rem;">
+                    <!-- Pending reviews injected dynamically -->
+                </div>
+                
+                <button class="btn-secondary" style="width: 100%; justify-content: center;" onclick="closeAdminPanel()">Close Panel</button>
+            </div>
+        </div>
+    </div>
 
     <script src="data.js"></script>
     <script src="app.js"></script>
