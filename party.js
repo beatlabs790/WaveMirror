@@ -1747,6 +1747,13 @@ function loadCustomVideoUrl(triggerBroadcast = false) {
         return;
     }
 
+    // Automatically hide local file prompts when loading custom links
+    const promptEl = document.getElementById("localFilePrompt");
+    if (promptEl) {
+        promptEl.style.display = "none";
+        promptEl.classList.add("hidden");
+    }
+
     const ytId = getYoutubeId(url);
     if (ytId) {
         // Toggle view: show iframe, hide native video player

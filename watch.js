@@ -5,6 +5,25 @@ let currentId = null;
 let currentType = "movie";
 let currentServer = 1;
 let currentImdb = "";
+let blockedPopupsCount = 0;
+
+// Global Ad & Popup Shield Override (Blocks window.open popups)
+window.open = function(url, target, features) {
+    blockedPopupsCount++;
+    console.warn(`[Shield] Intercepted popup #${blockedPopupsCount} attempt to: ${url}`);
+    showToast("🛡️ Ad Popup Intercepted");
+    return null;
+};
+
+// Automatic Focus Guard (Prevents external tabs from taking window focus)
+window.addEventListener("blur", () => {
+    if (document.activeElement && document.activeElement.tagName === "IFRAME") {
+        console.warn("[Shield] User clicked inside player iframe. Focusing window back...");
+        setTimeout(() => {
+            window.focus();
+        }, 100);
+    }
+});
 
 document.addEventListener("DOMContentLoaded", async () => {
     // Load saved accent color
@@ -77,7 +96,7 @@ function loadServer(num, btnElement = null) {
         updateTvStream();
     } else {
         if (num === 1) {
-            iframe.src = `https://vidsrc.to/embed/movie/${currentId}`;
+            iframe.src = `https://vidlink.pro/embed/movie/${currentId}`;
         } else if (num === 2) {
             iframe.src = `https://vidsrc.xyz/embed/movie/${currentImdb}`;
         } else if (num === 3) {
@@ -109,7 +128,7 @@ function updateTvStream() {
     if (!iframe) return;
 
     if (currentServer === 1) {
-        iframe.src = `https://vidsrc.to/embed/tv/${currentId}/${s}/${e}`;
+        iframe.src = `https://vidlink.pro/embed/tv/${currentId}/${s}/${e}`;
     } else if (currentServer === 2) {
         iframe.src = `https://vidsrc.xyz/embed/tv/${currentId}/${s}-${e}`;
     } else if (currentServer === 3) {
