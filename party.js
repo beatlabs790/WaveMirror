@@ -29,7 +29,8 @@ let partyState = {
     isMuted: false,
     allowGuestControls: false,
     localFileName: null,
-    localFileSize: null
+    localFileSize: null,
+    localVideoStream: null
 };
 
 // Initialize Profile on page load
@@ -271,11 +272,28 @@ function joinWatchParty(roomCode) {
     });
 
     partyState.peer.on("call", (call) => {
+        const metadata = call.metadata || {};
+        if (metadata.type === "videoBroadcast") {
+            call.answer();
+            call.on("stream", (remoteStream) => {
+                const video = document.getElementById("partyVideo");
+                if (video) {
+                    // Switch UI source to received video track
+                    video.srcObject = remoteStream;
+                    video.play().catch(e => console.log("Stream autoplay blocked:", e));
+                    
+                    // Hide guest local file overlay
+                    const prompt = document.getElementById("localFilePrompt");
+                    if (prompt) prompt.style.display = "none";
+                }
+            });
+            return;
+        }
+        
         // Automatically answer voice chat from host
         if (partyState.localAudioStream) {
             call.answer(partyState.localAudioStream);
         } else {
-            // Request permissions if not granted yet, or answer muted
             call.answer();
         }
         setupVoiceCall(call);
@@ -325,6 +343,14 @@ function setupHostConnection(conn) {
                         fileName: partyState.localFileName,
                         fileSize: partyState.localFileSize
                     });
+                    
+                    // Stream video stream directly to late-joining guest
+                    if (partyState.localVideoStream) {
+                        const call = partyState.peer.call(peerId, partyState.localVideoStream, {
+                            metadata: { type: "videoBroadcast" }
+                        });
+                        partyState.peerCalls[`video-${peerId}`] = call;
+                    }
                 } else {
                     conn.send({
                         type: "customUrlSync",
@@ -854,7 +880,7 @@ async function toggleVoiceChat() {
             } else {
                 // Client calls Host
                 const hostId = `wm-party-${partyState.roomId.replace("-", "")}`;
-                const call = partyState.peer.call(hostId, stream);
+                const call = partyState.peer.call(hostId, stream, { metadata: { type: "voice" } });
                 setupVoiceCall(call);
             }
         } catch (err) {
@@ -866,7 +892,7 @@ async function toggleVoiceChat() {
 
 function initiateVoiceCallToPeer(peerId) {
     if (!partyState.localAudioStream) return;
-    const call = partyState.peer.call(peerId, partyState.localAudioStream);
+    const call = partyState.peer.call(peerId, partyState.localAudioStream, { metadata: { type: "voice" } });
     setupVoiceCall(call);
 }
 
@@ -1521,6 +1547,11 @@ function handleLocalFileSelect(input) {
             fileName: file.name,
             fileSize: file.size
         });
+        
+        // Stream the captured video/audio tracks directly to guests (WebRTC Video Broadcast)
+        setTimeout(() => {
+            broadcastVideoMediaStream();
+        }, 800);
     }
 }
 
@@ -1555,4 +1586,42 @@ function handleGuestLocalFileSelect(input) {
             type: "requestHostSync"
         });
     }
+}
+
+// WebRTC Direct Video Stream Broadcast
+function broadcastVideoMediaStream() {
+    const video = document.getElementById("partyVideo");
+    if (!video) return;
+    
+    let stream = null;
+    try {
+        // Capture stream from playing video element (standard modern API)
+        stream = video.captureStream ? video.captureStream() : (video.mozCaptureStream ? video.mozCaptureStream() : null);
+    } catch (e) {
+        console.error("Failed to capture video element stream", e);
+    }
+    
+    if (!stream) {
+        console.warn("Direct stream capture unsupported or blocked");
+        return;
+    }
+    
+    partyState.localVideoStream = stream;
+    
+    // Stream to all connected peers in real-time
+    Object.keys(partyState.peerConns).forEach(peerId => {
+        // Stop any old stream connection first
+        if (partyState.peerCalls[`video-${peerId}`]) {
+            partyState.peerCalls[`video-${peerId}`].close();
+        }
+        
+        // Initiate connection call
+        const call = partyState.peer.call(peerId, stream, {
+            metadata: { type: "videoBroadcast" }
+        });
+        partyState.peerCalls[`video-${peerId}`] = call;
+    });
+    
+    addSystemMessage("Video broadcast stream successfully initialized.");
+    showToast("Broadcasting local video to members!");
 }
