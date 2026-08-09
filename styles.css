@@ -1677,12 +1677,126 @@ input:checked + .slider:before {
 
 /* Settings accent option circles */
 .settings-accent-opt {
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .settings-accent-opt:hover {
-    transform: scale(1.2);
+    transform: scale(1.15);
 }
 .settings-accent-opt.active {
     border-color: #fff !important;
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
 }
+
+/* Mobile Bottom Navigation Bar Styling */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 62px;
+    background: rgba(6, 8, 19, 0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255, 215, 0, 0.25);
+    z-index: 999;
+    align-items: center;
+    justify-content: space-around;
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.mobile-nav-item {
+    background: none;
+    border: none;
+    outline: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 6px 12px;
+    flex: 1;
+    min-height: 48px; /* Large touch target */
+}
+
+.mobile-nav-item span {
+    font-size: 1.3rem;
+    transition: transform 0.2s ease;
+}
+
+.mobile-nav-item label {
+    font-size: 0.65rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+}
+
+.mobile-nav-item:active span {
+    transform: scale(0.85);
+}
+
+@media (max-width: 768px) {
+    .mobile-bottom-nav {
+        display: flex;
+    }
+    body {
+        padding-bottom: 74px; /* Prevent bottom nav from covering content */
+    }
+    
+    /* Increase touch target sizes for all option selection circles on mobile */
+    .color-opt {
+        width: 34px !important;
+        height: 34px !important;
+    }
+    .theme-opt {
+        width: 34px !important;
+        height: 34px !important;
+    }
+    .settings-accent-opt {
+        width: 36px !important;
+        height: 36px !important;
+    }
+    
+    /* Increase close button target on mobile modal overlays */
+    .modal-close-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Make detail modal buttons full width and larger touch targets on mobile */
+    #modalWatchlistBtn, #modalWatchPartyBtn {
+        flex: 1;
+        min-width: 140px;
+        text-align: center;
+        justify-content: center;
+        padding: 0.8rem 1rem !important;
+        font-size: 0.85rem !important;
+        min-height: 44px;
+    }
+    
+    /* Expand inline controls and buttons on mobile players */
+    .shield-bar button {
+        padding: 0.55rem 0.9rem !important;
+        font-size: 0.8rem !important;
+        min-height: 38px;
+    }
+    .tv-controls-bar select {
+        padding: 0.55rem 0.8rem !important;
+        font-size: 0.8rem !important;
+        min-height: 38px;
+    }
+}
+

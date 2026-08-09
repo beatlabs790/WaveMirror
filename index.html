@@ -6,6 +6,23 @@
     <title>WaveMirror | Free Cinema & Series Streaming</title>
     <meta name="description" content="WaveMirror - Stream top trending movies, 4K HDR series, original blockbusters, and live trailers 100% free with built-in popup & ad shield. Powered by TMDB API.">
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="9dff5f12-e1c4-4575-81f4-5184844ca983.png">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://wavemirror.me/">
+    <meta property="og:title" content="WaveMirror | Free Cinema & Series Watch Party">
+    <meta property="og:description" content="Watch movies and series in perfect sync with friends. Free P2P watch party engine with voice/chat controls and ad shield.">
+    <meta property="og:image" content="https://wavemirror.me/9dff5f12-e1c4-4575-81f4-5184844ca983.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://wavemirror.me/">
+    <meta property="twitter:title" content="WaveMirror | Free Cinema & Series Watch Party">
+    <meta property="twitter:description" content="Watch movies and series in perfect sync with friends. Free P2P watch party engine with voice/chat controls and ad shield.">
+    <meta property="twitter:image" content="https://wavemirror.me/9dff5f12-e1c4-4575-81f4-5184844ca983.png">
 </head>
 <body>
     <!-- Global Loader -->
@@ -296,7 +313,7 @@
                     
                     <!-- Custom Link & Local File Loader Panel -->
                     <div id="partyCustomUrlPanel" class="hidden" style="display: none; gap: 1rem; align-items: center; margin-top: 1rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); flex-wrap: wrap;">
-                        <input type="text" id="partyCustomUrlInput" placeholder="Paste direct video URL (.mp4, .m3u8, etc.)" style="flex: 1; min-width: 200px; padding: 0.55rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: #fff; font-size: 0.85rem; outline: none;">
+                        <input type="text" id="partyCustomUrlInput" placeholder="Paste YouTube link or direct video URL (.mp4, .m3u8, etc.)" style="flex: 1; min-width: 200px; padding: 0.55rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: #fff; font-size: 0.85rem; outline: none;">
                         <button class="btn-primary" style="padding: 0.55rem 1rem; font-size: 0.85rem;" onclick="loadCustomVideoUrl(true)">Load Link</button>
                         <span style="color: var(--text-muted); font-size: 0.85rem;">or</span>
                         <button class="btn-secondary" style="padding: 0.55rem 1rem; font-size: 0.85rem; border-color: var(--primary-gold); color: var(--primary-gold);" onclick="document.getElementById('partyLocalFileInput').click()">📁 Select Local File</button>
@@ -663,11 +680,11 @@
                 <!-- Accent Color Picker -->
                 <div>
                     <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.6rem; font-weight: 500;">UI Accent Color</label>
-                    <div style="display: flex; gap: 0.8rem; justify-content: center;">
-                        <button class="settings-accent-opt active" style="background-color: #FFD700; width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer;" onclick="setGlobalAccent('#FFD700')"></button>
-                        <button class="settings-accent-opt" style="background-color: #ff3366; width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer;" onclick="setGlobalAccent('#ff3366')"></button>
-                        <button class="settings-accent-opt" style="background-color: #00f2fe; width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer;" onclick="setGlobalAccent('#00f2fe')"></button>
-                        <button class="settings-accent-opt" style="background-color: #00e676; width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer;" onclick="setGlobalAccent('#00e676')"></button>
+                    <div style="display: flex; gap: 1rem; justify-content: center;">
+                        <button class="settings-accent-opt active" style="background-color: #FFD700;" onclick="setGlobalAccent('#FFD700')"></button>
+                        <button class="settings-accent-opt" style="background-color: #ff3366;" onclick="setGlobalAccent('#ff3366')"></button>
+                        <button class="settings-accent-opt" style="background-color: #00f2fe;" onclick="setGlobalAccent('#00f2fe')"></button>
+                        <button class="settings-accent-opt" style="background-color: #00e676;" onclick="setGlobalAccent('#00e676')"></button>
                     </div>
                 </div>
 
@@ -736,6 +753,30 @@
                 <button class="btn-secondary" style="padding: 0.4rem 1rem; font-size: 0.8rem;" onclick="declineCookies()">Decline</button>
             </div>
         </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation Bar -->
+    <div class="mobile-bottom-nav">
+        <button class="mobile-nav-item" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+            <span>🏠</span>
+            <label>Home</label>
+        </button>
+        <button class="mobile-nav-item" onclick="showWatchPartyCreateUI()">
+            <span>🍿</span>
+            <label>Host</label>
+        </button>
+        <button class="mobile-nav-item" onclick="openJoinPartyModal()">
+            <span>🔑</span>
+            <label>Join</label>
+        </button>
+        <button class="mobile-nav-item" onclick="openProfileModal()">
+            <span>👤</span>
+            <label>Profile</label>
+        </button>
+        <button class="mobile-nav-item" onclick="openAppSettingsModal()">
+            <span>⚙️</span>
+            <label>Settings</label>
+        </button>
     </div>
 
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>

@@ -30,7 +30,8 @@ let partyState = {
     allowGuestControls: false,
     localFileName: null,
     localFileSize: null,
-    localVideoStream: null
+    localVideoStream: null,
+    ytPlayer: null
 };
 
 // Initialize Profile on page load
@@ -172,12 +173,14 @@ function showWatchPartyCreateUI() {
 }
 
 function generateRoomCode() {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // No confusing 0, O, 1, I
-    let code = "";
-    for (let i = 0; i < 4; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // No confusing characters like 0, O, 1, I
+    let code1 = "";
+    let code2 = "";
+    for (let i = 0; i < 3; i++) {
+        code1 += chars.charAt(Math.floor(Math.random() * chars.length));
+        code2 += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    return `WAVE-${code}`;
+    return `WAVE-${code1}-${code2}`;
 }
 
 function createWatchParty(roomCode) {
@@ -190,7 +193,7 @@ function createWatchParty(roomCode) {
     partyState.isHost = true;
     partyState.roomId = roomCode;
     
-    partyState.peer = new Peer(`wm-party-${roomCode.replace("-", "")}`, {
+    partyState.peer = new Peer(`wm-party-${roomCode.replace(/-/g, "")}`, {
         config: {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
@@ -263,7 +266,7 @@ function joinWatchParty(roomCode) {
     });
 
     partyState.peer.on("open", (id) => {
-        const hostId = `wm-party-${roomCode.replace("-", "")}`;
+        const hostId = `wm-party-${roomCode.replace(/-/g, "")}`;
         const conn = partyState.peer.connect(hostId, {
             metadata: { profile: localUser }
         });
@@ -335,33 +338,48 @@ function setupHostConnection(conn) {
         
         // Sync custom video player details
         if (partyState.activeMedia.server === 5) {
-            const video = document.getElementById("partyVideo");
-            if (video) {
-                if (partyState.localFileName) {
+            if (partyState.activeMedia.type === "youtube") {
+                conn.send({
+                    type: "customUrlSync",
+                    url: `https://www.youtube.com/watch?v=${partyState.activeMedia.id}`
+                });
+                if (partyState.ytPlayer && typeof partyState.ytPlayer.getCurrentTime !== "undefined") {
+                    const state = partyState.ytPlayer.getPlayerState();
                     conn.send({
-                        type: "localFileSync",
-                        fileName: partyState.localFileName,
-                        fileSize: partyState.localFileSize
-                    });
-                    
-                    // Stream video stream directly to late-joining guest
-                    if (partyState.localVideoStream) {
-                        const call = partyState.peer.call(peerId, partyState.localVideoStream, {
-                            metadata: { type: "videoBroadcast" }
-                        });
-                        partyState.peerCalls[`video-${peerId}`] = call;
-                    }
-                } else {
-                    conn.send({
-                        type: "customUrlSync",
-                        url: video.src
+                        type: "ytSync",
+                        action: (state === 2 || state === 0) ? "pause" : "play",
+                        time: partyState.ytPlayer.getCurrentTime()
                     });
                 }
-                conn.send({
-                    type: "videoSync",
-                    action: video.paused ? "pause" : "play",
-                    time: video.currentTime
-                });
+            } else {
+                const video = document.getElementById("partyVideo");
+                if (video) {
+                    if (partyState.localFileName) {
+                        conn.send({
+                            type: "localFileSync",
+                            fileName: partyState.localFileName,
+                            fileSize: partyState.localFileSize
+                        });
+                        
+                        // Stream video stream directly to late-joining guest
+                        if (partyState.localVideoStream) {
+                            const call = partyState.peer.call(peerId, partyState.localVideoStream, {
+                                metadata: { type: "videoBroadcast" }
+                            });
+                            partyState.peerCalls[`video-${peerId}`] = call;
+                        }
+                    } else {
+                        conn.send({
+                            type: "customUrlSync",
+                            url: video.src
+                        });
+                    }
+                    conn.send({
+                        type: "videoSync",
+                        action: video.paused ? "pause" : "play",
+                        time: video.currentTime
+                    });
+                }
             }
         }
 
@@ -526,25 +544,40 @@ function handleIncomingData(senderPeerId, data) {
                         media: partyState.activeMedia
                     });
                     if (partyState.activeMedia.server === 5) {
-                        const video = document.getElementById("partyVideo");
-                        if (video) {
-                            if (partyState.localFileName) {
+                        if (partyState.activeMedia.type === "youtube") {
+                            conn.send({
+                                type: "customUrlSync",
+                                url: `https://www.youtube.com/watch?v=${partyState.activeMedia.id}`
+                            });
+                            if (partyState.ytPlayer && typeof partyState.ytPlayer.getCurrentTime !== "undefined") {
+                                const state = partyState.ytPlayer.getPlayerState();
                                 conn.send({
-                                    type: "localFileSync",
-                                    fileName: partyState.localFileName,
-                                    fileSize: partyState.localFileSize
-                                });
-                            } else {
-                                conn.send({
-                                    type: "customUrlSync",
-                                    url: video.src
+                                    type: "ytSync",
+                                    action: (state === 2 || state === 0) ? "pause" : "play",
+                                    time: partyState.ytPlayer.getCurrentTime()
                                 });
                             }
-                            conn.send({
-                                type: "videoSync",
-                                action: video.paused ? "pause" : "play",
-                                time: video.currentTime
-                            });
+                        } else {
+                            const video = document.getElementById("partyVideo");
+                            if (video) {
+                                if (partyState.localFileName) {
+                                    conn.send({
+                                        type: "localFileSync",
+                                        fileName: partyState.localFileName,
+                                        fileSize: partyState.localFileSize
+                                    });
+                                } else {
+                                    conn.send({
+                                        type: "customUrlSync",
+                                        url: video.src
+                                    });
+                                }
+                                conn.send({
+                                    type: "videoSync",
+                                    action: video.paused ? "pause" : "play",
+                                    time: video.currentTime
+                                });
+                            }
                         }
                     }
                 }
@@ -553,6 +586,13 @@ function handleIncomingData(senderPeerId, data) {
             
         case "videoSync":
             handleIncomingVideoSync(data);
+            if (partyState.isHost) {
+                relayData(senderPeerId, data);
+            }
+            break;
+            
+        case "ytSync":
+            handleIncomingYtSync(data);
             if (partyState.isHost) {
                 relayData(senderPeerId, data);
             }
@@ -879,7 +919,7 @@ async function toggleVoiceChat() {
                 });
             } else {
                 // Client calls Host
-                const hostId = `wm-party-${partyState.roomId.replace("-", "")}`;
+                const hostId = `wm-party-${partyState.roomId.replace(/-/g, "")}`;
                 const call = partyState.peer.call(hostId, stream, { metadata: { type: "voice" } });
                 setupVoiceCall(call);
             }
@@ -1195,7 +1235,7 @@ function startWatchPartyFromModal() {
     partyState.isHost = true;
     partyState.roomId = code;
     
-    partyState.peer = new Peer(`wm-party-${code.replace("-", "")}`, {
+    partyState.peer = new Peer(`wm-party-${code.replace(/-/g, "")}`, {
         config: {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
@@ -1391,33 +1431,79 @@ function copyShareModalUrl() {
 // Synced HTML5 Video Player logic (Watchparty.me style)
 let isSyncingVideoState = false;
 
+function getYoutubeId(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
+
 function loadCustomVideoUrl(triggerBroadcast = false) {
     const input = document.getElementById("partyCustomUrlInput");
     const video = document.getElementById("partyVideo");
-    if (!input || !video) return;
+    const iframe = document.getElementById("partyIframe");
+    if (!input || !video || !iframe) return;
 
     const url = input.value.trim();
     if (!url) {
-        showToast("Please enter a direct video URL!");
+        showToast("Please enter a YouTube link or direct video URL!");
         return;
     }
 
-    video.src = url;
-    video.load();
+    const ytId = getYoutubeId(url);
+    if (ytId) {
+        // Toggle view: show iframe, hide native video player
+        iframe.style.display = "block";
+        iframe.classList.remove("hidden");
+        video.style.display = "none";
+        video.classList.add("hidden");
+        video.pause();
+        video.src = "";
 
-    addSystemMessage(`Loaded custom video URL: ${url}`);
-    showToast("Loaded custom video URL!");
+        iframe.src = `https://www.youtube.com/embed/${ytId}?enablejsapi=1&autoplay=1&controls=1&rel=0`;
 
-    if (triggerBroadcast) {
-        sendToParty({
-            type: "customUrlSync",
-            url: url
-        });
-        
-        // Update local active media state
+        partyState.activeMedia.id = ytId;
+        partyState.activeMedia.type = "youtube";
+        partyState.activeMedia.title = "YouTube Video Stream";
+        document.getElementById("partyMediaTitle").innerText = "YouTube Video Stream";
+        document.getElementById("partyMediaMeta").innerText = "YouTube Stream";
+
+        // Setup YouTube Player bindings
+        setupYoutubePlayer();
+
+        addSystemMessage(`Loaded YouTube Video ID: ${ytId}`);
+        showToast("YouTube video loaded!");
+
+        if (triggerBroadcast) {
+            sendToParty({
+                type: "customUrlSync",
+                url: url
+            });
+        }
+    } else {
+        // Switch back to standard native video element
+        iframe.style.display = "none";
+        iframe.classList.add("hidden");
+        video.style.display = "block";
+        video.classList.remove("hidden");
+
+        video.src = url;
+        video.load();
+
         partyState.activeMedia.id = "custom";
+        partyState.activeMedia.type = "movie";
         partyState.activeMedia.title = "Custom Shared Video Stream";
         document.getElementById("partyMediaTitle").innerText = "Custom Shared Video Stream";
+        document.getElementById("partyMediaMeta").innerText = "Custom HTML5 Stream";
+
+        addSystemMessage(`Loaded custom video URL: ${url}`);
+        showToast("Loaded custom video URL!");
+
+        if (triggerBroadcast) {
+            sendToParty({
+                type: "customUrlSync",
+                url: url
+            });
+        }
     }
 }
 
@@ -1625,3 +1711,114 @@ function broadcastVideoMediaStream() {
     addSystemMessage("Video broadcast stream successfully initialized.");
     showToast("Broadcasting local video to members!");
 }
+
+// YouTube Playback Synchronization Engine
+let isSyncingYtState = false;
+
+function setupYoutubePlayer() {
+    // If YouTube iframe API script is not loaded, inject it
+    if (typeof YT === "undefined" || typeof YT.Player === "undefined") {
+        if (!document.getElementById("yt-iframe-api-script")) {
+            const tag = document.createElement("script");
+            tag.id = "yt-iframe-api-script";
+            tag.src = "https://www.youtube.com/iframe_api";
+            const firstScriptTag = document.getElementsByTagName("script")[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+        }
+        
+        // Define global callback called by YT API
+        window.onYouTubeIframeAPIReady = () => {
+            initializeYoutubePlayerBinding();
+        };
+    } else {
+        // YT API is already loaded, bind directly
+        initializeYoutubePlayerBinding();
+    }
+}
+
+function initializeYoutubePlayerBinding() {
+    if (partyState.ytPlayer) {
+        try {
+            partyState.ytPlayer.destroy();
+        } catch (e) {
+            console.warn("Error destroying previous YT player instance", e);
+        }
+    }
+    
+    // Bind to the existing partyIframe element
+    partyState.ytPlayer = new YT.Player("partyIframe", {
+        events: {
+            "onStateChange": onYoutubePlayerStateChange
+        }
+    });
+}
+
+function onYoutubePlayerStateChange(event) {
+    if (isSyncingYtState) return;
+    
+    // Only capture state changes if allowed to control playback
+    if (partyState.isHost || partyState.allowGuestControls) {
+        if (event.data === YT.PlayerState.PLAYING) {
+            sendToParty({
+                type: "ytSync",
+                action: "play",
+                time: partyState.ytPlayer.getCurrentTime()
+            });
+        } else if (event.data === YT.PlayerState.PAUSED) {
+            sendToParty({
+                type: "ytSync",
+                action: "pause",
+                time: partyState.ytPlayer.getCurrentTime()
+            });
+        }
+    }
+}
+
+function handleIncomingYtSync(data) {
+    if (!partyState.ytPlayer || typeof partyState.ytPlayer.getPlayerState === "undefined") {
+        // If YT API is still loading, retry in a moment
+        setTimeout(() => handleIncomingYtSync(data), 200);
+        return;
+    }
+    
+    isSyncingYtState = true;
+    
+    if (data.action === "play") {
+        partyState.ytPlayer.seekTo(data.time, true);
+        partyState.ytPlayer.playVideo();
+    } else if (data.action === "pause") {
+        partyState.ytPlayer.seekTo(data.time, true);
+        partyState.ytPlayer.pauseVideo();
+    } else if (data.action === "pingSync") {
+        const currTime = partyState.ytPlayer.getCurrentTime();
+        if (Math.abs(currTime - data.time) > 1.8) {
+            partyState.ytPlayer.seekTo(data.time, true);
+        }
+        
+        const state = partyState.ytPlayer.getPlayerState();
+        if (data.paused && state !== YT.PlayerState.PAUSED && state !== YT.PlayerState.ENDED) {
+            partyState.ytPlayer.pauseVideo();
+        } else if (!data.paused && state !== YT.PlayerState.PLAYING && state !== YT.PlayerState.BUFFERING) {
+            partyState.ytPlayer.playVideo();
+        }
+    }
+    
+    setTimeout(() => {
+        isSyncingYtState = false;
+    }, 300);
+}
+
+// Append a periodic YouTube sync check inside the global interval timer
+setInterval(() => {
+    if (partyState.inParty && partyState.isHost && partyState.activeMedia.type === "youtube") {
+        if (partyState.ytPlayer && typeof partyState.ytPlayer.getPlayerState !== "undefined") {
+            const state = partyState.ytPlayer.getPlayerState();
+            sendToParty({
+                type: "ytSync",
+                action: "pingSync",
+                time: partyState.ytPlayer.getCurrentTime(),
+                paused: (state === YT.PlayerState.PAUSED || state === YT.PlayerState.ENDED)
+            });
+        }
+    }
+}, 4000);
