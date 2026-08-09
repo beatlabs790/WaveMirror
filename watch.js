@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (!currentId) {
         showToast("Error: No media selected!");
-        setTimeout(() => { window.location.href = "index.html"; }, 1500);
+        setTimeout(() => { window.location.href = "./"; }, 1500);
         return;
     }
 
@@ -179,7 +179,7 @@ function updateWatchlistButton() {
 function startWatchPartyFromPlayer() {
     if (!currentId) return;
     // Redirect to watch party screen on homepage with movie query params
-    window.location.href = `index.html?startParty=true&movieId=${currentId}&type=${currentType}&server=${currentServer}`;
+    window.location.href = `./?startParty=true&movieId=${currentId}&type=${currentType}&server=${currentServer}`;
 }
 
 function setGlobalAccent(colorHex) {
