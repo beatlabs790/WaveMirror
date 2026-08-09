@@ -27,15 +27,6 @@ window.open = function(url, target, features) {
     return null;
 };
 
-// Automatic Focus Guard (Prevents external tabs from taking window focus)
-window.addEventListener("blur", () => {
-    if (document.activeElement && document.activeElement.tagName === "IFRAME") {
-        setTimeout(() => {
-            window.focus();
-        }, 150);
-    }
-});
-
 // Initialize App
 document.addEventListener("DOMContentLoaded", () => {
     initApp();

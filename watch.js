@@ -15,16 +15,6 @@ window.open = function(url, target, features) {
     return null;
 };
 
-// Automatic Focus Guard (Prevents external tabs from taking window focus)
-window.addEventListener("blur", () => {
-    if (document.activeElement && document.activeElement.tagName === "IFRAME") {
-        console.warn("[Shield] User clicked inside player iframe. Focusing window back...");
-        setTimeout(() => {
-            window.focus();
-        }, 100);
-    }
-});
-
 document.addEventListener("DOMContentLoaded", async () => {
     // Load saved accent color
     const savedAccent = localStorage.getItem("wavemirror_accent_color");
