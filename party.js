@@ -2031,9 +2031,6 @@ function broadcastVideoMediaStream() {
 let isSyncingYtState = false;
 
 function setupYoutubePlayer() {
-    const iframe = document.getElementById("partyIframe");
-    if (!iframe) return;
-
     const bindHelper = () => {
         if (typeof YT !== "undefined" && typeof YT.Player !== "undefined") {
             initializeYoutubePlayerBinding();
@@ -2057,12 +2054,8 @@ function setupYoutubePlayer() {
         }
     }
     
-    // Listen for iframe load event before initializing binding
-    iframe.onload = () => {
-        setTimeout(bindHelper, 300);
-    };
-    // Also trigger it as fallback in case onload already fired
-    setTimeout(bindHelper, 500);
+    // Bind directly using polling helper
+    setTimeout(bindHelper, 100);
 }
 
 function initializeYoutubePlayerBinding() {
@@ -2074,10 +2067,20 @@ function initializeYoutubePlayerBinding() {
         }
     }
     
-    // Bind to the existing partyIframe element
+    // Bind to the partyIframe element and initialize video stream
     partyState.ytPlayer = new YT.Player("partyIframe", {
+        videoId: partyState.activeMedia.id,
+        playerVars: {
+            autoplay: 1,
+            controls: 1,
+            rel: 0,
+            enablejsapi: 1
+        },
         events: {
-            "onStateChange": onYoutubePlayerStateChange
+            "onStateChange": onYoutubePlayerStateChange,
+            "onReady": (event) => {
+                try { event.target.playVideo(); } catch(e) {}
+            }
         }
     });
 }
