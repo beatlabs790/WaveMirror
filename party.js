@@ -950,7 +950,7 @@ async function loadPartyMedia(mediaId, type = "movie", server = 1, season = 1, e
             }
 
             if (server === 1) {
-                iframe.src = `https://vidsrc.to/embed/tv/${mediaId}/${season}/${episode}`;
+                iframe.src = `https://vidlink.pro/embed/tv/${mediaId}/${season}/${episode}`;
             } else if (server === 2) {
                 iframe.src = `https://vidsrc.xyz/embed/tv/${mediaId}/${season}-${episode}`;
             } else if (server === 3) {
@@ -963,7 +963,7 @@ async function loadPartyMedia(mediaId, type = "movie", server = 1, season = 1, e
             document.getElementById("partyTvControls").classList.add("hidden");
 
             if (server === 1) {
-                iframe.src = `https://vidsrc.to/embed/movie/${mediaId}`;
+                iframe.src = `https://vidlink.pro/embed/movie/${mediaId}`;
             } else if (server === 2) {
                 iframe.src = `https://vidsrc.xyz/embed/movie/${imdb}`;
             } else if (server === 3) {
@@ -1992,8 +1992,18 @@ function broadcastVideoMediaStream() {
     
     partyState.localVideoStream = stream;
     
-    // Stream to all connected peers in real-time
-    Object.keys(partyState.peerConns).forEach(peerId => {
+    // Stream to all connected peers in real-time (WebRTC or Firebase mode members)
+    const targets = new Set();
+    Object.keys(partyState.peerConns).forEach(id => targets.add(id));
+    if (partyState.members) {
+        Object.values(partyState.members).forEach(m => {
+            if (m.peerId && partyState.peer && m.peerId !== partyState.peer.id) {
+                targets.add(m.peerId);
+            }
+        });
+    }
+
+    targets.forEach(peerId => {
         // Stop any old stream connection first
         if (partyState.peerCalls[`video-${peerId}`]) {
             partyState.peerCalls[`video-${peerId}`].close();
@@ -2014,6 +2024,17 @@ function broadcastVideoMediaStream() {
 let isSyncingYtState = false;
 
 function setupYoutubePlayer() {
+    const iframe = document.getElementById("partyIframe");
+    if (!iframe) return;
+
+    const bindHelper = () => {
+        if (typeof YT !== "undefined" && typeof YT.Player !== "undefined") {
+            initializeYoutubePlayerBinding();
+        } else {
+            setTimeout(bindHelper, 200);
+        }
+    };
+
     // If YouTube iframe API script is not loaded, inject it
     if (typeof YT === "undefined" || typeof YT.Player === "undefined") {
         if (!document.getElementById("yt-iframe-api-script")) {
@@ -2021,17 +2042,20 @@ function setupYoutubePlayer() {
             tag.id = "yt-iframe-api-script";
             tag.src = "https://www.youtube.com/iframe_api";
             const firstScriptTag = document.getElementsByTagName("script")[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            if (firstScriptTag && firstScriptTag.parentNode) {
+                firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+            } else {
+                document.head.appendChild(tag);
+            }
         }
-        
-        // Define global callback called by YT API
-        window.onYouTubeIframeAPIReady = () => {
-            initializeYoutubePlayerBinding();
-        };
-    } else {
-        // YT API is already loaded, bind directly
-        initializeYoutubePlayerBinding();
     }
+    
+    // Listen for iframe load event before initializing binding
+    iframe.onload = () => {
+        setTimeout(bindHelper, 300);
+    };
+    // Also trigger it as fallback in case onload already fired
+    setTimeout(bindHelper, 500);
 }
 
 function initializeYoutubePlayerBinding() {
@@ -2140,6 +2164,25 @@ async function initFirebaseHost(roomCode, initMediaId = null, initMediaType = nu
         partyState.db = firebase.database();
         partyState.dbRoomRef = partyState.db.ref(`rooms/${partyState.roomId}`);
 
+        // Setup background PeerJS for WebRTC voice and streaming support
+        if (typeof Peer !== "undefined") {
+            partyState.peer = createPeerInstance(`wm-party-${partyState.roomId.replace(/-/g, "")}`);
+            partyState.peer.on("open", (id) => {
+                partyState.dbRoomRef.child("members/hostKey").update({ peerId: id });
+            });
+            partyState.peer.on("call", (call) => {
+                const metadata = call.metadata || {};
+                if (metadata.type === "voice") {
+                    if (partyState.localAudioStream) {
+                        call.answer(partyState.localAudioStream);
+                    } else {
+                        call.answer();
+                    }
+                    setupVoiceCall(call);
+                }
+            });
+        }
+
         // Set initial room values
         await partyState.dbRoomRef.set({
             host: localUser.username,
@@ -2244,6 +2287,38 @@ async function initFirebaseGuest(roomCode) {
             role: "Guest",
             isMuted: false
         });
+
+        // Setup background PeerJS for WebRTC voice and streaming support
+        if (typeof Peer !== "undefined") {
+            partyState.peer = createPeerInstance();
+            partyState.peer.on("open", (id) => {
+                partyState.dbRoomRef.child(`members/${myKey}`).update({ peerId: id });
+            });
+            partyState.peer.on("call", (call) => {
+                const metadata = call.metadata || {};
+                if (metadata.type === "videoBroadcast") {
+                    call.answer();
+                    call.on("stream", (remoteStream) => {
+                        const video = document.getElementById("partyVideo");
+                        if (video) {
+                            video.srcObject = remoteStream;
+                            video.play().catch(e => console.log("Stream autoplay blocked:", e));
+                            const prompt = document.getElementById("localFilePrompt");
+                            if (prompt) prompt.style.display = "none";
+                        }
+                    });
+                    return;
+                }
+                if (metadata.type === "voice") {
+                    if (partyState.localAudioStream) {
+                        call.answer(partyState.localAudioStream);
+                    } else {
+                        call.answer();
+                    }
+                    setupVoiceCall(call);
+                }
+            });
+        }
 
         // Sync active media selection
         partyState.dbRoomRef.child("activeMedia").on("value", (snap) => {

@@ -424,7 +424,7 @@ function loadServer(num, btnElement) {
         updateTvStream();
     } else {
         if (num === 1) {
-            iframe.src = `https://vidsrc.to/embed/movie/${tmdbId}`;
+            iframe.src = `https://vidlink.pro/embed/movie/${tmdbId}`;
         } else if (num === 2) {
             iframe.src = `https://vidsrc.xyz/embed/movie/${imdb}`;
         } else if (num === 3) {
@@ -467,9 +467,8 @@ function updateTvStream() {
     const iframe = document.getElementById("playerIframe");
     const id = window.currentId || "1399";
     const sNum = window.currentServer || 1;
-
     if (sNum === 1) {
-        iframe.src = `https://vidsrc.to/embed/tv/${id}/${s}/${e}`;
+        iframe.src = `https://vidlink.pro/embed/tv/${id}/${s}/${e}`;
     } else if (sNum === 2) {
         iframe.src = `https://vidsrc.xyz/embed/tv/${id}/${s}-${e}`;
     } else if (sNum === 3) {
