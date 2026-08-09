@@ -326,6 +326,10 @@ function handleSearch(event) {
 
 /* ---------------- In-App Player & vidsrc Stream Engine ---------------- */
 async function openPlayerModal(id, mediaType = "movie") {
+    window.location.href = `watch.html?id=${id}&type=${mediaType}`;
+}
+// Old modal logic retained for reference or unused function stubbing
+async function unused_openPlayerModal(id, mediaType = "movie") {
     const modal = document.getElementById("playerModal");
     const iframe = document.getElementById("playerIframe");
     const title = document.getElementById("modalTitle");

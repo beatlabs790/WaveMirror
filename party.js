@@ -206,7 +206,75 @@ function checkUrlForParty() {
     if (partyRoom) {
         showToast(`Joining Watch Party ${partyRoom}...`);
         joinWatchParty(partyRoom);
+        return;
     }
+
+    const startParty = params.get("startParty");
+    if (startParty === "true") {
+        const movieId = params.get("movieId");
+        const type = params.get("type") || "movie";
+        const server = parseInt(params.get("server")) || 1;
+        
+        // Host a party with this movie!
+        const code = generateRoomCode();
+        if (partyState.syncMode === "firebase") {
+            partyState.isHost = true;
+            partyState.roomId = code;
+            initFirebaseHost(code, movieId, type, server);
+        } else {
+            createWatchPartyWithMedia(code, movieId, type, server);
+        }
+    }
+}
+
+function createWatchPartyWithMedia(roomCode, movieId, type, server) {
+    if (typeof Peer === "undefined") {
+        setTimeout(() => createWatchPartyWithMedia(roomCode, movieId, type, server), 200);
+        return;
+    }
+    roomCode = roomCode.toUpperCase().trim();
+    showLoader(true);
+    partyState.isHost = true;
+    partyState.roomId = roomCode;
+    
+    partyState.peer = createPeerInstance(`wm-party-${roomCode.replace(/-/g, "")}`);
+
+    partyState.peer.on("open", (id) => {
+        partyState.inParty = true;
+        const myId = id;
+        partyState.members[myId] = { ...localUser, isMuted: false, role: "Host" };
+        
+        switchToPartyView();
+        document.getElementById("partyRoomCode").innerText = roomCode;
+        addSystemMessage("Watch Party created! Copy the link and share it with friends.");
+        showLoader(false);
+        
+        loadPartyMedia(movieId, type, server, 1, 1, true);
+    });
+
+    partyState.peer.on("connection", (conn) => {
+        setupHostConnection(conn);
+    });
+
+    partyState.peer.on("call", (call) => {
+        if (partyState.isVoiceActive && partyState.localAudioStream) {
+            call.answer(partyState.localAudioStream);
+            setupVoiceCall(call);
+        } else {
+            call.answer(); 
+        }
+    });
+
+    partyState.peer.on("error", (err) => {
+        console.error("PeerJS Error", err);
+        showLoader(false);
+        if (err.type === "unavailable-id") {
+            showToast("This Watch Party room is already active! Creating a different one...");
+            createWatchPartyWithMedia(generateRoomCode(), movieId, type, server);
+        } else {
+            showToast(`Connection error: ${err.message}`);
+        }
+    });
 }
 
 function showWatchPartyCreateUI() {

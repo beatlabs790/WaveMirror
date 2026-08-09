@@ -272,7 +272,7 @@
                                 </button>
                             </div>
                         </div>
-                        <iframe class="party-iframe" id="partyIframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                        <iframe class="party-iframe" id="partyIframe" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                         <video class="party-video hidden" id="partyVideo" controls style="display: none; width: 100%; height: calc(100% - 40px); background: #000; border: none;"></video>
                         
                         <!-- Guest Local File Selector Overlay Prompt -->
@@ -447,7 +447,7 @@
 
             <div class="player-wrapper" id="playerWrapper">
                 <!-- Unrestricted iframe playback allowing vidsrc stream engine to load natively -->
-                <iframe class="player-iframe" id="playerIframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                <iframe class="player-iframe" id="playerIframe" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
 
             <div class="modal-details">
