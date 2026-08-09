@@ -1,5 +1,29 @@
 // WaveMirror Watch Party Engine - P2P Sync & Audio/Chat Dashboard using PeerJS
 
+const ICE_CONFIG = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:openrelay.metered.ca:80' },
+        {
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelay',
+            credential: 'openrelay'
+        },
+        {
+            urls: 'turn:openrelay.metered.ca:443',
+            username: 'openrelay',
+            credential: 'openrelay'
+        },
+        {
+            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+            username: 'openrelay',
+            credential: 'openrelay'
+        }
+    ]
+};
+
 // State variables
 let localUser = {
     username: "",
@@ -194,13 +218,7 @@ function createWatchParty(roomCode) {
     partyState.roomId = roomCode;
     
     partyState.peer = new Peer(`wm-party-${roomCode.replace(/-/g, "")}`, {
-        config: {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' }
-            ]
-        },
+        config: ICE_CONFIG,
         debug: 1
     });
 
@@ -254,25 +272,61 @@ function joinWatchParty(roomCode) {
     partyState.isHost = false;
     partyState.roomId = roomCode;
     
+    let connectRetries = 0;
+    
     partyState.peer = new Peer({
-        config: {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' }
-            ]
-        },
+        config: ICE_CONFIG,
         debug: 1
     });
 
     partyState.peer.on("open", (id) => {
+        tryConnectToHost();
+    });
+
+    function tryConnectToHost() {
         const hostId = `wm-party-${roomCode.replace(/-/g, "")}`;
+        console.log(`Attempting connection to host: ${hostId} (Attempt ${connectRetries + 1})`);
+        
         const conn = partyState.peer.connect(hostId, {
             metadata: { profile: localUser }
         });
         
         setupGuestConnection(conn);
-    });
+        
+        // Listen to error on the connection itself
+        conn.on("error", (err) => {
+            console.warn("Connection error, retrying...", err);
+            handleConnectionFailure();
+        });
+        
+        // If connection doesn't open within 4.5 seconds, try again
+        const timeoutTimer = setTimeout(() => {
+            if (!partyState.inParty) {
+                console.warn("Connection attempt timed out. Retrying...");
+                conn.close();
+                handleConnectionFailure();
+            }
+        }, 4500);
+        
+        // Clear timeout if connection succeeds
+        conn.on("open", () => {
+            clearTimeout(timeoutTimer);
+        });
+    }
+    
+    function handleConnectionFailure() {
+        if (connectRetries < 2) {
+            connectRetries++;
+            showToast(`Connection handshake delayed. Retrying (${connectRetries}/3)...`);
+            setTimeout(() => {
+                tryConnectToHost();
+            }, 1200);
+        } else {
+            showLoader(false);
+            showToast("Could not reach Watch Party host. Check the code or connection.");
+            leaveWatchParty();
+        }
+    }
 
     partyState.peer.on("call", (call) => {
         const metadata = call.metadata || {};
@@ -281,11 +335,8 @@ function joinWatchParty(roomCode) {
             call.on("stream", (remoteStream) => {
                 const video = document.getElementById("partyVideo");
                 if (video) {
-                    // Switch UI source to received video track
                     video.srcObject = remoteStream;
                     video.play().catch(e => console.log("Stream autoplay blocked:", e));
-                    
-                    // Hide guest local file overlay
                     const prompt = document.getElementById("localFilePrompt");
                     if (prompt) prompt.style.display = "none";
                 }
@@ -293,7 +344,6 @@ function joinWatchParty(roomCode) {
             return;
         }
         
-        // Automatically answer voice chat from host
         if (partyState.localAudioStream) {
             call.answer(partyState.localAudioStream);
         } else {
@@ -304,9 +354,12 @@ function joinWatchParty(roomCode) {
 
     partyState.peer.on("error", (err) => {
         console.error("PeerJS Error", err);
-        showLoader(false);
-        showToast("Could not connect to the Watch Party. Make sure the room code is correct.");
-        leaveWatchParty();
+        // Avoid quitting on standard connection warnings that are handled via retries
+        if (err.type !== "peer-unavailable" && err.type !== "network") {
+            showLoader(false);
+            showToast(`Connection error: ${err.type}`);
+            leaveWatchParty();
+        }
     });
 }
 
@@ -1236,13 +1289,7 @@ function startWatchPartyFromModal() {
     partyState.roomId = code;
     
     partyState.peer = new Peer(`wm-party-${code.replace(/-/g, "")}`, {
-        config: {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' }
-            ]
-        },
+        config: ICE_CONFIG,
         debug: 1
     });
 
