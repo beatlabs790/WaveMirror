@@ -289,22 +289,43 @@ function createWatchParty(roomCode) {
     });
 }
 
-function joinWatchParty(roomCode) {
+async function joinWatchParty(roomCode) {
     roomCode = roomCode.toUpperCase().trim();
-    if (partyState.syncMode === "firebase") {
-        initFirebaseGuest(roomCode);
-        return;
+    showLoader(true);
+    
+    // Auto-detect Sync Mode: Check if room exists on Firebase
+    if (typeof firebase !== "undefined") {
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(DEFAULT_FIREBASE_CONFIG);
+            }
+            const db = firebase.database();
+            const roomRef = db.ref(`rooms/${roomCode}`);
+            const snapshot = await roomRef.once("value");
+            
+            if (snapshot.exists()) {
+                console.log("Firebase room found! Joining via Cloud Database sync...");
+                partyState.syncMode = "firebase";
+                initFirebaseGuest(roomCode);
+                return;
+            }
+        } catch (e) {
+            console.warn("Firebase check failed, trying WebRTC...", e);
+        }
     }
+    
+    // Fall back to WebRTC
+    console.log("Room not found on Firebase. Falling back to WebRTC...");
+    partyState.syncMode = "webrtc";
+    
     if (typeof Peer === "undefined") {
         setTimeout(() => joinWatchParty(roomCode), 200);
         return;
     }
-    showLoader(true);
+    
     partyState.isHost = false;
     partyState.roomId = roomCode;
-    
     let connectRetries = 0;
-    
     partyState.peer = createPeerInstance();
 
     partyState.peer.on("open", (id) => {
@@ -796,11 +817,24 @@ async function loadPartyMedia(mediaId, type = "movie", server = 1, season = 1, e
     const customPanel = document.getElementById("partyCustomUrlPanel");
     
     if (server === 5) {
-        iframe.style.display = "none";
-        iframe.classList.add("hidden");
-        if (video) {
-            video.style.display = "block";
-            video.classList.remove("hidden");
+        if (type === "youtube") {
+            iframe.style.display = "block";
+            iframe.classList.remove("hidden");
+            if (video) {
+                video.style.display = "none";
+                video.classList.add("hidden");
+                video.pause();
+                video.src = "";
+            }
+            iframe.src = `https://www.youtube.com/embed/${mediaId}?enablejsapi=1&autoplay=1&controls=1&rel=0`;
+            setupYoutubePlayer();
+        } else {
+            iframe.style.display = "none";
+            iframe.classList.add("hidden");
+            if (video) {
+                video.style.display = "block";
+                video.classList.remove("hidden");
+            }
         }
         if (customPanel) {
             customPanel.style.display = "flex";
@@ -2085,8 +2119,15 @@ async function initFirebaseGuest(roomCode) {
         // Sync active media selection
         partyState.dbRoomRef.child("activeMedia").on("value", (snap) => {
             const media = snap.val();
-            if (media && (media.id !== partyState.activeMedia.id || media.server !== partyState.activeMedia.server)) {
-                loadPartyMedia(media.id, media.type, media.server, media.season, media.episode, false);
+            if (media) {
+                const isDifferent = media.id !== partyState.activeMedia.id ||
+                                    media.server !== partyState.activeMedia.server ||
+                                    media.season !== partyState.activeMedia.season ||
+                                    media.episode !== partyState.activeMedia.episode ||
+                                    media.type !== partyState.activeMedia.type;
+                if (isDifferent) {
+                    loadPartyMedia(media.id, media.type, media.server, media.season, media.episode, false);
+                }
             }
         });
 
