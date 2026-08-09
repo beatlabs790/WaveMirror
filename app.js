@@ -1334,10 +1334,12 @@ function openAppSettingsModal() {
     const accent = localStorage.getItem("wavemirror_accent_color") || "#FFD700";
     const server = localStorage.getItem("wavemirror_preferred_server") || "1";
     const autoplay = localStorage.getItem("wavemirror_autoplay_trailers") !== "false";
+    const syncMode = localStorage.getItem("wavemirror_sync_mode") || "firebase";
     
     // Select correct values
     document.getElementById("settingPreferredServer").value = server;
     document.getElementById("settingAutoplayCheck").checked = autoplay;
+    document.getElementById("settingSyncMode").value = syncMode;
     
     // Select active accent color
     const opts = document.querySelectorAll(".settings-accent-opt");
@@ -1383,6 +1385,15 @@ function updateDefaultServerPref() {
     const val = document.getElementById("settingPreferredServer").value;
     localStorage.setItem("wavemirror_preferred_server", val);
     showToast("Preferred streaming server updated!");
+}
+
+function updateSyncModePref() {
+    const val = document.getElementById("settingSyncMode").value;
+    localStorage.setItem("wavemirror_sync_mode", val);
+    if (window.partyState) {
+        window.partyState.syncMode = val;
+    }
+    showToast("Watch Party sync mode updated!");
 }
 
 function updateAutoplayPref(checked) {

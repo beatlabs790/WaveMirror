@@ -24,6 +24,18 @@ const ICE_CONFIG = {
     ]
 };
 
+function createPeerInstance(id = null) {
+    const options = {
+        host: '0.peerjs.com',
+        port: 443,
+        path: '/',
+        secure: true,
+        config: ICE_CONFIG,
+        debug: 1
+    };
+    return id ? new Peer(id, options) : new Peer(options);
+}
+
 // State variables
 let localUser = {
     username: "",
@@ -55,7 +67,21 @@ let partyState = {
     localFileName: null,
     localFileSize: null,
     localVideoStream: null,
-    ytPlayer: null
+    ytPlayer: null,
+    syncMode: localStorage.getItem("wavemirror_sync_mode") || "firebase",
+    db: null,
+    dbRoomRef: null
+};
+
+const DEFAULT_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyAPjV1bkduOVAl8u_30C7XbO7MgkDo9yE4",
+    authDomain: "chicknbun.firebaseapp.com",
+    databaseURL: "https://chicknbun-default-rtdb.firebaseio.com",
+    projectId: "chicknbun",
+    storageBucket: "chicknbun.firebasestorage.app",
+    messagingSenderId: "645109894487",
+    appId: "1:645109894487:web:99466cf25e3e5b6019c212",
+    measurementId: "G-N7F026W5G5"
 };
 
 // Initialize Profile on page load
@@ -208,19 +234,20 @@ function generateRoomCode() {
 }
 
 function createWatchParty(roomCode) {
+    roomCode = roomCode.toUpperCase().trim();
+    if (partyState.syncMode === "firebase") {
+        initFirebaseHost(roomCode);
+        return;
+    }
     if (typeof Peer === "undefined") {
         setTimeout(() => createWatchParty(roomCode), 200);
         return;
     }
-    roomCode = roomCode.toUpperCase().trim();
     showLoader(true);
     partyState.isHost = true;
     partyState.roomId = roomCode;
     
-    partyState.peer = new Peer(`wm-party-${roomCode.replace(/-/g, "")}`, {
-        config: ICE_CONFIG,
-        debug: 1
-    });
+    partyState.peer = createPeerInstance(`wm-party-${roomCode.replace(/-/g, "")}`);
 
     partyState.peer.on("open", (id) => {
         partyState.inParty = true;
@@ -263,21 +290,22 @@ function createWatchParty(roomCode) {
 }
 
 function joinWatchParty(roomCode) {
+    roomCode = roomCode.toUpperCase().trim();
+    if (partyState.syncMode === "firebase") {
+        initFirebaseGuest(roomCode);
+        return;
+    }
     if (typeof Peer === "undefined") {
         setTimeout(() => joinWatchParty(roomCode), 200);
         return;
     }
-    roomCode = roomCode.toUpperCase().trim();
     showLoader(true);
     partyState.isHost = false;
     partyState.roomId = roomCode;
     
     let connectRetries = 0;
     
-    partyState.peer = new Peer({
-        config: ICE_CONFIG,
-        debug: 1
-    });
+    partyState.peer = createPeerInstance();
 
     partyState.peer.on("open", (id) => {
         tryConnectToHost();
@@ -657,8 +685,58 @@ function handleIncomingData(senderPeerId, data) {
     }
 }
 
-// Send data to everyone in the party
 function sendToParty(data) {
+    if (partyState.syncMode === "firebase") {
+        if (partyState.dbRoomRef) {
+            if (data.type === "chatMessage") {
+                partyState.dbRoomRef.child("chat").push({
+                    username: data.username,
+                    message: data.message,
+                    color: data.color,
+                    avatar: data.avatar,
+                    timestamp: Date.now()
+                });
+            } else if (data.type === "videoSync") {
+                if (partyState.isHost || partyState.allowGuestControls) {
+                    partyState.dbRoomRef.child("videoState").set({
+                        action: data.action,
+                        time: data.time,
+                        paused: data.paused !== undefined ? data.paused : (data.action === "pause"),
+                        timestamp: Date.now()
+                    });
+                }
+            } else if (data.type === "mediaSync") {
+                if (partyState.isHost) {
+                    partyState.dbRoomRef.child("activeMedia").set(data.media);
+                }
+            } else if (data.type === "customUrlSync") {
+                if (partyState.isHost) {
+                    partyState.dbRoomRef.child("customUrl").set({
+                        url: data.url,
+                        timestamp: Date.now()
+                    });
+                }
+            } else if (data.type === "localFileSync") {
+                if (partyState.isHost) {
+                    partyState.dbRoomRef.child("localFile").set({
+                        fileName: data.fileName,
+                        fileSize: data.fileSize,
+                        timestamp: Date.now()
+                    });
+                }
+            } else if (data.type === "ytSync") {
+                if (partyState.isHost || partyState.allowGuestControls) {
+                    partyState.dbRoomRef.child("ytState").set({
+                        action: data.action,
+                        time: data.time,
+                        timestamp: Date.now()
+                    });
+                }
+            }
+        }
+        return;
+    }
+
     if (partyState.isHost) {
         // Relays data to all active peer connections
         Object.values(partyState.peerConns).forEach(conn => {
@@ -1080,6 +1158,7 @@ function switchToPartyView() {
 }
 
 function leaveWatchParty() {
+    exitFirebaseRoom();
     partyState.inParty = false;
     
     // Stop audio
@@ -1283,15 +1362,24 @@ function startWatchPartyFromModal() {
     // Create code
     const code = generateRoomCode();
     
+    if (partyState.syncMode === "firebase") {
+        partyState.isHost = true;
+        partyState.roomId = code;
+        initFirebaseHost(code, mediaId, mediaType, currentServerNum);
+        return;
+    }
+    
+    if (typeof Peer === "undefined") {
+        showToast("WebRTC library loading, please try again in a second...");
+        return;
+    }
+    
     // Custom party creator logic to initialize with specific movie
     showLoader(true);
     partyState.isHost = true;
     partyState.roomId = code;
     
-    partyState.peer = new Peer(`wm-party-${code.replace(/-/g, "")}`, {
-        config: ICE_CONFIG,
-        debug: 1
-    });
+    partyState.peer = createPeerInstance(`wm-party-${code.replace(/-/g, "")}`);
 
     partyState.peer.on("open", (id) => {
         partyState.inParty = true;
@@ -1869,3 +1957,228 @@ setInterval(() => {
         }
     }
 }, 4000);
+
+// --- Firebase Real-time Database Synchronization Engine ---
+
+async function initFirebaseHost(roomCode, initMediaId = null, initMediaType = null, initServer = null) {
+    if (typeof firebase === "undefined") {
+        showToast("Cloud Database API still loading, please wait...");
+        return;
+    }
+    showLoader(true);
+    partyState.roomId = roomCode.toUpperCase().trim();
+    partyState.inParty = true;
+    partyState.isHost = true;
+
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(DEFAULT_FIREBASE_CONFIG);
+        }
+        partyState.db = firebase.database();
+        partyState.dbRoomRef = partyState.db.ref(`rooms/${partyState.roomId}`);
+
+        // Set initial room values
+        await partyState.dbRoomRef.set({
+            host: localUser.username,
+            activeMedia: partyState.activeMedia,
+            videoState: {
+                action: "pause",
+                time: 0,
+                paused: true,
+                timestamp: Date.now()
+            },
+            members: {
+                hostKey: { ...localUser, role: "Host", isMuted: false }
+            }
+        });
+
+        // Listen for new members
+        partyState.dbRoomRef.child("members").on("child_added", (snapshot) => {
+            const member = snapshot.val();
+            if (member && member.username !== localUser.username) {
+                addSystemMessage(`👋 ${member.username} joined via Cloud Database!`);
+                partyState.members[snapshot.key] = member;
+                renderMemberList();
+            }
+        });
+
+        // Listen for member leaves/changes
+        partyState.dbRoomRef.child("members").on("child_changed", (snapshot) => {
+            const member = snapshot.val();
+            if (member) {
+                partyState.members[snapshot.key] = member;
+                renderMemberList();
+            }
+        });
+
+        partyState.dbRoomRef.child("members").on("child_removed", (snapshot) => {
+            const member = snapshot.val();
+            if (member) {
+                addSystemMessage(`${member.username} left the party.`);
+                delete partyState.members[snapshot.key];
+                renderMemberList();
+            }
+        });
+
+        switchToPartyView();
+        document.getElementById("partyRoomCode").innerText = roomCode;
+        addSystemMessage("Watch Party created on Cloud Database! Share the link to sync.");
+        showLoader(false);
+
+        // Load correct media
+        if (initMediaId) {
+            loadPartyMedia(initMediaId, initMediaType, initServer, 1, 1, true);
+        } else {
+            loadPartyMedia("693134", "movie", 1, 1, 1, true); // Dune 2
+        }
+    } catch (e) {
+        console.error("Firebase Host Init Failed", e);
+        showLoader(false);
+        showToast("Firebase Cloud Database connection failed.");
+    }
+}
+
+async function initFirebaseGuest(roomCode) {
+    if (typeof firebase === "undefined") {
+        showToast("Cloud Database API still loading, please wait...");
+        return;
+    }
+    showLoader(true);
+    partyState.roomId = roomCode.toUpperCase().trim();
+    partyState.isHost = false;
+
+    try {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(DEFAULT_FIREBASE_CONFIG);
+        }
+        partyState.db = firebase.database();
+        partyState.dbRoomRef = partyState.db.ref(`rooms/${partyState.roomId}`);
+
+        // Check if room exists
+        const snapshot = await partyState.dbRoomRef.once("value");
+        if (!snapshot.exists()) {
+            showLoader(false);
+            showToast("Watch Party room code not found on Cloud Database!");
+            return;
+        }
+
+        partyState.inParty = true;
+
+        // Listen to members
+        partyState.dbRoomRef.child("members").on("value", (snap) => {
+            const list = snap.val();
+            if (list) {
+                partyState.members = list;
+                renderMemberList();
+            }
+        });
+
+        // Add self
+        const myKey = `guest_${Math.random().toString(36).substring(2, 8)}`;
+        partyState.myGuestKey = myKey;
+        await partyState.dbRoomRef.child(`members/${myKey}`).set({
+            ...localUser,
+            role: "Guest",
+            isMuted: false
+        });
+
+        // Sync active media selection
+        partyState.dbRoomRef.child("activeMedia").on("value", (snap) => {
+            const media = snap.val();
+            if (media && (media.id !== partyState.activeMedia.id || media.server !== partyState.activeMedia.server)) {
+                loadPartyMedia(media.id, media.type, media.server, media.season, media.episode, false);
+            }
+        });
+
+        // Sync video playback state
+        let lastVideoTimestamp = 0;
+        partyState.dbRoomRef.child("videoState").on("value", (snap) => {
+            const state = snap.val();
+            if (state && state.timestamp > lastVideoTimestamp) {
+                lastVideoTimestamp = state.timestamp;
+                handleIncomingVideoSync({
+                    action: state.action,
+                    time: state.time,
+                    paused: state.paused
+                });
+            }
+        });
+
+        // Sync custom URL loads
+        let lastUrlTimestamp = 0;
+        partyState.dbRoomRef.child("customUrl").on("value", (snap) => {
+            const data = snap.val();
+            if (data && data.timestamp > lastUrlTimestamp) {
+                lastUrlTimestamp = data.timestamp;
+                const customUrlInput = document.getElementById("partyCustomUrlInput");
+                if (customUrlInput) {
+                    customUrlInput.value = data.url;
+                }
+                loadCustomVideoUrl(false);
+            }
+        });
+
+        // Sync local files picker overlay trigger
+        let lastFileTimestamp = 0;
+        partyState.dbRoomRef.child("localFile").on("value", (snap) => {
+            const data = snap.val();
+            if (data && data.timestamp > lastFileTimestamp) {
+                lastFileTimestamp = data.timestamp;
+                partyState.localFileName = data.fileName;
+                partyState.localFileSize = data.fileSize;
+                loadPartyMedia("custom", "movie", 5, 1, 1, false);
+                const promptBox = document.getElementById("localFilePrompt");
+                if (promptBox) {
+                    promptBox.style.display = "flex";
+                    promptBox.classList.remove("hidden");
+                    document.getElementById("localFilePromptText").innerHTML = `Host is playing a local file:<br><strong>${data.fileName}</strong> (${(data.fileSize / 1024 / 1024).toFixed(1)} MB).<br>Select your local copy of this file to watch in perfect sync.`;
+                }
+            }
+        });
+
+        // Sync YouTube state
+        let lastYtTimestamp = 0;
+        partyState.dbRoomRef.child("ytState").on("value", (snap) => {
+            const state = snap.val();
+            if (state && state.timestamp > lastYtTimestamp) {
+                lastYtTimestamp = state.timestamp;
+                handleIncomingYtSync({
+                    action: state.action,
+                    time: state.time
+                });
+            }
+        });
+
+        // Sync Chat Messages
+        partyState.dbRoomRef.child("chat").on("child_added", (snap) => {
+            const msg = snap.val();
+            if (msg && msg.username !== localUser.username) {
+                appendPartyChatMessage(msg.username, msg.message, msg.color, msg.avatar);
+            }
+        });
+
+        // On window close/unload, remove self from database
+        window.addEventListener("beforeunload", exitFirebaseRoom);
+
+        switchToPartyView();
+        document.getElementById("partyRoomCode").innerText = roomCode;
+        addSystemMessage("Connected to Watch Party via Cloud Database!");
+        showLoader(false);
+    } catch (e) {
+        console.error("Firebase Guest Init Failed", e);
+        showLoader(false);
+        showToast("Firebase Cloud Database connection failed.");
+    }
+}
+
+function exitFirebaseRoom() {
+    if (partyState.syncMode === "firebase" && partyState.dbRoomRef) {
+        if (partyState.isHost) {
+            partyState.dbRoomRef.remove();
+        } else if (partyState.myGuestKey) {
+            partyState.dbRoomRef.child(`members/${partyState.myGuestKey}`).remove();
+        }
+        window.removeEventListener("beforeunload", exitFirebaseRoom);
+        partyState.dbRoomRef = null;
+    }
+}

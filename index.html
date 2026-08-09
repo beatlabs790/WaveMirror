@@ -699,6 +699,15 @@
                     </select>
                 </div>
 
+                <!-- Watch Party Sync Mode -->
+                <div>
+                    <label style="font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 0.4rem; font-weight: 500;">Watch Party Sync Mode</label>
+                    <select id="settingSyncMode" class="select-dropdown" style="width: 100%;" onchange="updateSyncModePref()">
+                        <option value="firebase">☁️ Cloud Database (100% Mobile Compatible)</option>
+                        <option value="webrtc">🌐 P2P WebRTC (Direct Peer-to-Peer)</option>
+                    </select>
+                </div>
+
                 <!-- Autoplay Switch -->
                 <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1rem;">
                     <span style="font-size: 0.85rem; color: #fff;">Autoplay Trailers</span>
@@ -779,7 +788,9 @@
         </button>
     </div>
 
-    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.4.7/peerjs.min.js"></script>
     <script src="data.js"></script>
     <script src="app.js"></script>
     <script src="party.js"></script>
