@@ -27,7 +27,9 @@ let partyState = {
     peerCalls: {},  // Map of peerId -> mediaCall
     isVoiceActive: false,
     isMuted: false,
-    allowGuestControls: false
+    allowGuestControls: false,
+    localFileName: null,
+    localFileSize: null
 };
 
 // Initialize Profile on page load
@@ -312,6 +314,30 @@ function setupHostConnection(conn) {
             type: "permissionsUpdate",
             allowGuestControls: partyState.allowGuestControls
         });
+        
+        // Sync custom video player details
+        if (partyState.activeMedia.server === 5) {
+            const video = document.getElementById("partyVideo");
+            if (video) {
+                if (partyState.localFileName) {
+                    conn.send({
+                        type: "localFileSync",
+                        fileName: partyState.localFileName,
+                        fileSize: partyState.localFileSize
+                    });
+                } else {
+                    conn.send({
+                        type: "customUrlSync",
+                        url: video.src
+                    });
+                }
+                conn.send({
+                    type: "videoSync",
+                    action: video.paused ? "pause" : "play",
+                    time: video.currentTime
+                });
+            }
+        }
 
         // Broadcast updated member list to everyone
         broadcastMemberList();
@@ -444,6 +470,8 @@ function handleIncomingData(senderPeerId, data) {
             break;
             
         case "customUrlSync":
+            const promptEl = document.getElementById("localFilePrompt");
+            if (promptEl) promptEl.style.display = "none";
             const customUrlInput = document.getElementById("partyCustomUrlInput");
             if (customUrlInput) {
                 customUrlInput.value = data.url;
@@ -451,10 +479,55 @@ function handleIncomingData(senderPeerId, data) {
             loadCustomVideoUrl(false);
             break;
             
+        case "localFileSync":
+            partyState.localFileName = data.fileName;
+            partyState.localFileSize = data.fileSize;
+            loadPartyMedia("custom", "movie", 5, 1, 1, false);
+            const promptBox = document.getElementById("localFilePrompt");
+            if (promptBox) {
+                promptBox.style.display = "flex";
+                promptBox.classList.remove("hidden");
+                document.getElementById("localFilePromptText").innerHTML = `Host is playing a local file:<br><strong>${data.fileName}</strong> (${(data.fileSize / 1024 / 1024).toFixed(1)} MB).<br>Select your local copy of this file to watch in perfect sync.`;
+            }
+            break;
+            
+        case "requestHostSync":
+            if (partyState.isHost) {
+                const conn = partyState.peerConns[senderPeerId];
+                if (conn && conn.open) {
+                    conn.send({
+                        type: "mediaSync",
+                        media: partyState.activeMedia
+                    });
+                    if (partyState.activeMedia.server === 5) {
+                        const video = document.getElementById("partyVideo");
+                        if (video) {
+                            if (partyState.localFileName) {
+                                conn.send({
+                                    type: "localFileSync",
+                                    fileName: partyState.localFileName,
+                                    fileSize: partyState.localFileSize
+                                });
+                            } else {
+                                conn.send({
+                                    type: "customUrlSync",
+                                    url: video.src
+                                });
+                            }
+                            conn.send({
+                                type: "videoSync",
+                                action: video.paused ? "pause" : "play",
+                                time: video.currentTime
+                            });
+                        }
+                    }
+                }
+            }
+            break;
+            
         case "videoSync":
             handleIncomingVideoSync(data);
             if (partyState.isHost) {
-                // Relay sync to all guests
                 relayData(senderPeerId, data);
             }
             break;
@@ -540,6 +613,11 @@ async function loadPartyMedia(mediaId, type = "movie", server = 1, season = 1, e
         document.getElementById("partyTvControls").style.display = "none";
         document.getElementById("partyTvControls").classList.add("hidden");
     } else {
+        partyState.localFileName = null;
+        partyState.localFileSize = null;
+        const promptEl = document.getElementById("localFilePrompt");
+        if (promptEl) promptEl.style.display = "none";
+        
         iframe.style.display = "block";
         iframe.classList.remove("hidden");
         if (video) {
@@ -1404,3 +1482,77 @@ setInterval(() => {
 document.addEventListener("DOMContentLoaded", () => {
     setupVideoSyncListeners();
 });
+
+// Synced Local File Player controllers (Watchparty.me style)
+function handleLocalFileSelect(input) {
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    
+    // Save metadata
+    partyState.localFileName = file.name;
+    partyState.localFileSize = file.size;
+    
+    // Convert to browser URL
+    const objectURL = URL.createObjectURL(file);
+    const video = document.getElementById("partyVideo");
+    if (video) {
+        video.src = objectURL;
+        video.load();
+        video.play().catch(e => console.log("Local autoplay blocked:", e));
+    }
+    
+    // Update local header UI
+    partyState.activeMedia.id = "local";
+    partyState.activeMedia.title = `Local File: ${file.name}`;
+    document.getElementById("partyMediaTitle").innerText = `Local File: ${file.name}`;
+    document.getElementById("partyMediaMeta").innerText = `Local Stream • ${(file.size / 1024 / 1024).toFixed(1)} MB`;
+    
+    addSystemMessage(`Loaded local file: ${file.name}`);
+    showToast("Loaded local file successfully!");
+    
+    // Hide local file prompt overlay if host selected it
+    const prompt = document.getElementById("localFilePrompt");
+    if (prompt) prompt.style.display = "none";
+    
+    // Broadcast file sync to guests
+    if (partyState.isHost) {
+        sendToParty({
+            type: "localFileSync",
+            fileName: file.name,
+            fileSize: file.size
+        });
+    }
+}
+
+function handleGuestLocalFileSelect(input) {
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    
+    // Convert to browser URL
+    const objectURL = URL.createObjectURL(file);
+    const video = document.getElementById("partyVideo");
+    if (video) {
+        video.src = objectURL;
+        video.load();
+    }
+    
+    // Update guest header UI
+    partyState.activeMedia.id = "local";
+    partyState.activeMedia.title = `Local File: ${file.name}`;
+    document.getElementById("partyMediaTitle").innerText = `Local File: ${file.name}`;
+    document.getElementById("partyMediaMeta").innerText = `Local Stream • ${(file.size / 1024 / 1024).toFixed(1)} MB`;
+    
+    addSystemMessage(`Loaded local copy: ${file.name}`);
+    showToast("Loaded local copy!");
+    
+    // Hide guest prompt overlay
+    const prompt = document.getElementById("localFilePrompt");
+    if (prompt) prompt.style.display = "none";
+    
+    // Request current playhead position from host
+    if (partyState.hostConn && partyState.hostConn.open) {
+        partyState.hostConn.send({
+            type: "requestHostSync"
+        });
+    }
+}

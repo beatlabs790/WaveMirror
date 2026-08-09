@@ -256,6 +256,15 @@
                         </div>
                         <iframe class="party-iframe" id="partyIframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
                         <video class="party-video hidden" id="partyVideo" controls style="display: none; width: 100%; height: calc(100% - 40px); background: #000; border: none;"></video>
+                        
+                        <!-- Guest Local File Selector Overlay Prompt -->
+                        <div id="localFilePrompt" class="hidden" style="display: none; position: absolute; inset: 0; background: rgba(5, 10, 20, 0.95); z-index: 100; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 2rem; text-align: center;">
+                            <span style="font-size: 2.5rem; animation: pulse 2s infinite;">📁</span>
+                            <h3 style="color: #fff; font-size: 1.15rem; margin: 0; font-family: var(--font-heading); font-weight: 600;">Syncing Local Video File</h3>
+                            <p style="color: var(--text-muted); font-size: 0.85rem; max-width: 420px; margin: 0; line-height: 1.5;" id="localFilePromptText">Host is playing a local file. Select your local copy of this file to watch together in perfect synchronization.</p>
+                            <button class="btn-primary" style="padding: 0.55rem 1.2rem; font-size: 0.85rem;" onclick="document.getElementById('guestLocalFileInput').click()">Select Local Copy</button>
+                            <input type="file" id="guestLocalFileInput" accept="video/*" style="display: none;" onchange="handleGuestLocalFileSelect(this)">
+                        </div>
                     </div>
                     
                     <!-- TV Series Selectors for Party -->
@@ -285,10 +294,13 @@
                         </div>
                     </div>
                     
-                    <!-- Custom Link Loader Panel -->
-                    <div id="partyCustomUrlPanel" class="hidden" style="display: none; gap: 1rem; align-items: center; margin-top: 1rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass);">
-                        <input type="text" id="partyCustomUrlInput" placeholder="Paste direct video URL (.mp4, .m3u8, etc.)" style="flex: 1; padding: 0.55rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: #fff; font-size: 0.85rem; outline: none;">
+                    <!-- Custom Link & Local File Loader Panel -->
+                    <div id="partyCustomUrlPanel" class="hidden" style="display: none; gap: 1rem; align-items: center; margin-top: 1rem; background: rgba(255, 255, 255, 0.05); padding: 0.8rem; border-radius: var(--radius-sm); border: 1px solid var(--border-glass); flex-wrap: wrap;">
+                        <input type="text" id="partyCustomUrlInput" placeholder="Paste direct video URL (.mp4, .m3u8, etc.)" style="flex: 1; min-width: 200px; padding: 0.55rem 1rem; background: rgba(0,0,0,0.3); border: 1px solid var(--border-glass); border-radius: var(--radius-sm); color: #fff; font-size: 0.85rem; outline: none;">
                         <button class="btn-primary" style="padding: 0.55rem 1rem; font-size: 0.85rem;" onclick="loadCustomVideoUrl(true)">Load Link</button>
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">or</span>
+                        <button class="btn-secondary" style="padding: 0.55rem 1rem; font-size: 0.85rem; border-color: var(--primary-gold); color: var(--primary-gold);" onclick="document.getElementById('partyLocalFileInput').click()">📁 Select Local File</button>
+                        <input type="file" id="partyLocalFileInput" accept="video/*" style="display: none;" onchange="handleLocalFileSelect(this)">
                     </div>
                     
                     <!-- Interactive Inline Catalog Browser -->
