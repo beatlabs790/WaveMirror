@@ -1352,6 +1352,201 @@ body {
     cursor: pointer;
     transition: var(--transition);
 }
+}
+
+.party-card-box {
+    background: rgba(10, 22, 40, 0.5); /* Semi-transparent */
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-md);
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+}
+
+.member-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 160px;
+    overflow-y: auto;
+}
+
+.member-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.6rem;
+    background: rgba(255, 255, 255, 0.01);
+    border-radius: 6px;
+}
+
+.member-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    color: #fff;
+}
+
+.member-name {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #fff;
+}
+
+.member-badge {
+    font-size: 0.6rem;
+    font-weight: 500;
+    padding: 2px 5px;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+.member-badge.host {
+    background: rgba(255, 215, 0, 0.15);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    color: var(--primary-gold);
+}
+
+.member-badge.guest {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+}
+
+.voice-status-badge {
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 1px 6px;
+    border-radius: var(--radius-full);
+    background: rgba(255,255,255,0.03);
+    color: var(--text-muted);
+}
+.voice-status-badge.active {
+    background: rgba(0, 230, 118, 0.08);
+    color: #00e676;
+    border: 1px solid rgba(0, 230, 118, 0.2);
+}
+
+.voice-controls-row {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.6rem;
+}
+
+.party-chat-box {
+    background: rgba(10, 22, 40, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: var(--radius-md);
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    height: 380px;
+    backdrop-filter: blur(10px);
+}
+
+.chat-messages-area {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+}
+
+.chat-message-item {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.chat-message-bubble {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border-top-left-radius: 0;
+    padding: 0.5rem 0.8rem;
+    max-width: 90%;
+}
+
+.chat-message-user {
+    font-size: 0.7rem;
+    font-weight: 500;
+    margin-bottom: 0.1rem;
+    display: block;
+}
+
+.chat-message-text {
+    font-size: 0.8rem;
+    color: var(--text-main);
+    line-height: 1.35;
+    word-break: break-word;
+    font-weight: 300;
+}
+
+.chat-system-message {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.01);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 0.3rem;
+    text-align: center;
+    font-style: italic;
+    width: 100%;
+}
+
+.chat-input-row {
+    display: flex;
+    gap: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    padding-top: 0.6rem;
+}
+
+.chat-input-row input {
+    flex: 1;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.8rem;
+    color: #fff;
+    font-size: 0.8rem;
+    outline: none;
+    font-weight: 300;
+    transition: var(--transition);
+}
+
+.chat-input-row input:focus {
+    border-color: rgba(255, 215, 0, 0.3);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.1);
+}
+
+.emoji-opt {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 1.2rem;
+    padding: 0.35rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.emoji-opt:hover, .emoji-opt.active {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: rgba(255, 215, 0, 0.3);
+}
+
+.color-opt {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: var(--transition);
+}
 .color-opt:hover, .color-opt.active {
     transform: scale(1.1);
     border-color: #fff;
@@ -1360,8 +1555,8 @@ body {
 @media (max-width: 992px) {
     .party-container {
         flex-direction: column;
-    flex-direction: column;
-    backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+    }
 }
 
 .member-list-container {
@@ -1563,6 +1758,64 @@ body {
     .party-sidebar-section {
         width: 100%;
         min-width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Watch Party Container Optimizations on Mobile */
+    .party-container {
+        padding: 0.6rem 0.6rem 5rem !important; /* Save space for bottom menu */
+        gap: 0.8rem !important;
+    }
+    
+    .party-header-bar {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.6rem;
+    }
+    
+    .party-code-area {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .party-player-wrapper {
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+    }
+
+    .party-chat-box {
+        height: 280px !important; /* Shorter chat box on mobile */
+        padding: 0.8rem !important;
+    }
+    
+    .party-server-bar {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 0.8rem !important;
+    }
+    
+    .party-server-bar .server-switcher {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        justify-content: center;
+    }
+    
+    .party-server-bar .server-btn {
+        flex: 1 1 calc(50% - 0.4rem);
+        min-width: 120px;
+        font-size: 0.75rem !important;
+        padding: 0.4rem 0.5rem !important;
+    }
+    
+    .shield-bar {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    #partySyncStatusNotice {
+        font-size: 0.65rem !important;
     }
 }
 
