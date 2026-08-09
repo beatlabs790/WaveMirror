@@ -882,26 +882,26 @@ async function loadPartyMedia(mediaId, type = "movie", server = 1, season = 1, e
             }
 
             if (server === 1) {
-                iframe.src = `https://vidsrc.pm/embed/tv/${mediaId}/${season}-${episode}`;
+                iframe.src = `https://vidsrc.to/embed/tv/${mediaId}/${season}/${episode}`;
             } else if (server === 2) {
                 iframe.src = `https://vidsrc.xyz/embed/tv/${mediaId}/${season}-${episode}`;
             } else if (server === 3) {
-                iframe.src = `https://vidsrc.to/embed/tv/${mediaId}/${season}/${episode}`;
+                iframe.src = `https://vidsrc.cc/embed/tv/${mediaId}/${season}/${episode}`;
             } else {
-                iframe.src = `https://autoembed.to/tv/tmdb/${mediaId}-${season}-${episode}`;
+                iframe.src = `https://autoembed.cc/embed/tv/${mediaId}/${season}/${episode}`;
             }
         } else {
             document.getElementById("partyTvControls").style.display = "none";
             document.getElementById("partyTvControls").classList.add("hidden");
 
             if (server === 1) {
-                iframe.src = `https://vidsrc.pm/embed/movie/${imdb}`;
+                iframe.src = `https://vidsrc.to/embed/movie/${mediaId}`;
             } else if (server === 2) {
                 iframe.src = `https://vidsrc.xyz/embed/movie/${imdb}`;
             } else if (server === 3) {
-                iframe.src = `https://vidsrc.to/embed/movie/${mediaId}`;
+                iframe.src = `https://vidsrc.cc/embed/movie/${mediaId}`;
             } else {
-                iframe.src = `https://autoembed.to/movie/tmdb/${mediaId}`;
+                iframe.src = `https://autoembed.cc/embed/movie/${mediaId}`;
             }
         }
     }

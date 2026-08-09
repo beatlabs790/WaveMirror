@@ -371,10 +371,10 @@ async function openPlayerModal(id, mediaType = "movie") {
         generateSeasonEpisodeDropdowns(movie.seasonsCount || 1);
         
         switcher.innerHTML = `
-            <button class="server-btn active" onclick="loadServer(1, this)">Server 1 (vidsrc.pm)</button>
+            <button class="server-btn active" onclick="loadServer(1, this)">Server 1 (vidsrc.to)</button>
             <button class="server-btn" onclick="loadServer(2, this)">Server 2 (vidsrc.xyz)</button>
-            <button class="server-btn" onclick="loadServer(3, this)">Server 3 (vidsrc.to)</button>
-            <button class="server-btn" onclick="loadServer(4, this)">Server 4 (autoembed)</button>
+            <button class="server-btn" onclick="loadServer(3, this)">Server 3 (vidsrc.cc)</button>
+            <button class="server-btn" onclick="loadServer(4, this)">Server 4 (autoembed.cc)</button>
         `;
 
         updateTvStream();
@@ -383,10 +383,10 @@ async function openPlayerModal(id, mediaType = "movie") {
         tvControls.classList.add("hidden");
 
         switcher.innerHTML = `
-            <button class="server-btn active" onclick="loadServer(1, this)">Server 1 (vidsrc.pm)</button>
+            <button class="server-btn active" onclick="loadServer(1, this)">Server 1 (vidsrc.to)</button>
             <button class="server-btn" onclick="loadServer(2, this)">Server 2 (vidsrc.xyz)</button>
-            <button class="server-btn" onclick="loadServer(3, this)">Server 3 (vidsrc.to)</button>
-            <button class="server-btn" onclick="loadServer(4, this)">Server 4 (autoembed)</button>
+            <button class="server-btn" onclick="loadServer(3, this)">Server 3 (vidsrc.cc)</button>
+            <button class="server-btn" onclick="loadServer(4, this)">Server 4 (autoembed.cc)</button>
         `;
 
         loadServer(1);
@@ -420,13 +420,13 @@ function loadServer(num, btnElement) {
         updateTvStream();
     } else {
         if (num === 1) {
-            iframe.src = `https://vidsrc.pm/embed/movie/${imdb}`;
+            iframe.src = `https://vidsrc.to/embed/movie/${tmdbId}`;
         } else if (num === 2) {
             iframe.src = `https://vidsrc.xyz/embed/movie/${imdb}`;
         } else if (num === 3) {
-            iframe.src = `https://vidsrc.to/embed/movie/${tmdbId}`;
+            iframe.src = `https://vidsrc.cc/embed/movie/${tmdbId}`;
         } else {
-            iframe.src = `https://autoembed.to/movie/tmdb/${tmdbId}`;
+            iframe.src = `https://autoembed.cc/embed/movie/${tmdbId}`;
         }
     }
 
@@ -465,13 +465,13 @@ function updateTvStream() {
     const sNum = window.currentServer || 1;
 
     if (sNum === 1) {
-        iframe.src = `https://vidsrc.pm/embed/tv/${id}/${s}-${e}`;
+        iframe.src = `https://vidsrc.to/embed/tv/${id}/${s}/${e}`;
     } else if (sNum === 2) {
         iframe.src = `https://vidsrc.xyz/embed/tv/${id}/${s}-${e}`;
     } else if (sNum === 3) {
-        iframe.src = `https://vidsrc.to/embed/tv/${id}/${s}/${e}`;
+        iframe.src = `https://vidsrc.cc/embed/tv/${id}/${s}/${e}`;
     } else {
-        iframe.src = `https://autoembed.to/tv/tmdb/${id}-${s}-${e}`;
+        iframe.src = `https://autoembed.cc/embed/tv/${id}/${s}/${e}`;
     }
 }
 
