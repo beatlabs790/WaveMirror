@@ -1629,9 +1629,42 @@ function copyShareModalUrl() {
 let isSyncingVideoState = false;
 
 function getYoutubeId(url) {
+    if (!url) return null;
+    try {
+        if (url.includes("youtu.be/")) {
+            const parts = url.split("youtu.be/");
+            if (parts[1]) {
+                const id = parts[1].split(/[?#]/)[0].trim();
+                if (id.length === 11) return id;
+            }
+        }
+        
+        // Strip out brackets or enclosing characters if any
+        url = url.trim().replace(/[<>]/g, "");
+        const urlObj = new URL(url);
+        if (urlObj.hostname.includes("youtube.com") || urlObj.hostname.includes("youtu.be")) {
+            const v = urlObj.searchParams.get("v");
+            if (v && v.trim().length === 11) return v.trim();
+            
+            const pathParts = urlObj.pathname.split("/");
+            const embedIndex = pathParts.indexOf("embed");
+            if (embedIndex !== -1 && pathParts[embedIndex + 1]) {
+                const id = pathParts[embedIndex + 1].split(/[?#]/)[0].trim();
+                if (id.length === 11) return id;
+            }
+            
+            const vIndex = pathParts.indexOf("v");
+            if (vIndex !== -1 && pathParts[vIndex + 1]) {
+                const id = pathParts[vIndex + 1].split(/[?#]/)[0].trim();
+                if (id.length === 11) return id;
+            }
+        }
+    } catch (e) {
+        console.warn("URL parsing failed for YouTube check, falling back to regex matcher...", e);
+    }
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
+    return (match && match[2].trim().length === 11) ? match[2].trim() : null;
 }
 
 function loadCustomVideoUrl(triggerBroadcast = false) {
