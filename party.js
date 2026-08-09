@@ -950,7 +950,7 @@ async function loadPartyMedia(mediaId, type = "movie", server = 1, season = 1, e
             }
 
             if (server === 1) {
-                iframe.src = `https://vidlink.pro/embed/tv/${mediaId}/${season}/${episode}`;
+                iframe.src = `https://vidlink.pro/tv/${mediaId}/${season}/${episode}`;
             } else if (server === 2) {
                 iframe.src = `https://vidsrc.xyz/embed/tv/${mediaId}/${season}-${episode}`;
             } else if (server === 3) {
@@ -963,7 +963,7 @@ async function loadPartyMedia(mediaId, type = "movie", server = 1, season = 1, e
             document.getElementById("partyTvControls").classList.add("hidden");
 
             if (server === 1) {
-                iframe.src = `https://vidlink.pro/embed/movie/${mediaId}`;
+                iframe.src = `https://vidlink.pro/movie/${mediaId}`;
             } else if (server === 2) {
                 iframe.src = `https://vidsrc.xyz/embed/movie/${imdb}`;
             } else if (server === 3) {

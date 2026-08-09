@@ -96,7 +96,7 @@ function loadServer(num, btnElement = null) {
         updateTvStream();
     } else {
         if (num === 1) {
-            iframe.src = `https://vidlink.pro/embed/movie/${currentId}`;
+            iframe.src = `https://vidlink.pro/movie/${currentId}`;
         } else if (num === 2) {
             iframe.src = `https://vidsrc.xyz/embed/movie/${currentImdb}`;
         } else if (num === 3) {
@@ -128,7 +128,7 @@ function updateTvStream() {
     if (!iframe) return;
 
     if (currentServer === 1) {
-        iframe.src = `https://vidlink.pro/embed/tv/${currentId}/${s}/${e}`;
+        iframe.src = `https://vidlink.pro/tv/${currentId}/${s}/${e}`;
     } else if (currentServer === 2) {
         iframe.src = `https://vidsrc.xyz/embed/tv/${currentId}/${s}-${e}`;
     } else if (currentServer === 3) {
