@@ -1,0 +1,17 @@
+# WaveMirror
+
+Next-generation client-side video player and WebRTC-based Watch Party streaming platform.
+
+## Core Features
+- **Multiplayer Watch Party**: Shared video sync and voice chat powered by PeerJS (WebRTC) P2P.
+- **HTML5 Player Engine**: Dynamic source swapper with playback speed, time coordinate syncing, and drift guard.
+- **Ad & Popup Shield**: Intercepts invasive scripts from public video player embeds.
+- **Watchlist & Profiles**: LocalStorage-persisted watchlist items and customizable avatars.
+- **Moderation Tools**: Lightweight client-side admin reviews dashboard.
+
+## Codebase Architecture
+- [index.html](index.html): Semantic HTML5 landing layout, movie catalog grids, and settings panels.
+- [styles.css](styles.css): Glassmorphic variables, Outfit/Jakarta typography definitions, responsive grids, and iOS toggle controls.
+- [app.js](app.js): App lifecycle initializer, TMDB API catalog fetcher, reviews controller, and global settings/accent swappers.
+- [party.js](party.js): WebRTC network signaling handlers, voice streams tracker, room code generator, and HTML5 video synchronization events.
+- [data.js](data.js): Offline mock dataset fallback lists.
