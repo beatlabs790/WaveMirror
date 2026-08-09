@@ -716,7 +716,7 @@ function sendToParty(data) {
                     color: data.color,
                     avatar: data.avatar,
                     timestamp: Date.now()
-                });
+                }).catch(handleFirebaseWriteError);
             } else if (data.type === "videoSync") {
                 if (partyState.isHost || partyState.allowGuestControls) {
                     partyState.dbRoomRef.child("videoState").set({
@@ -724,18 +724,18 @@ function sendToParty(data) {
                         time: data.time,
                         paused: data.paused !== undefined ? data.paused : (data.action === "pause"),
                         timestamp: Date.now()
-                    });
+                    }).catch(handleFirebaseWriteError);
                 }
             } else if (data.type === "mediaSync") {
                 if (partyState.isHost) {
-                    partyState.dbRoomRef.child("activeMedia").set(data.media);
+                    partyState.dbRoomRef.child("activeMedia").set(data.media).catch(handleFirebaseWriteError);
                 }
             } else if (data.type === "customUrlSync") {
                 if (partyState.isHost) {
                     partyState.dbRoomRef.child("customUrl").set({
                         url: data.url,
                         timestamp: Date.now()
-                    });
+                    }).catch(handleFirebaseWriteError);
                 }
             } else if (data.type === "localFileSync") {
                 if (partyState.isHost) {
@@ -743,7 +743,7 @@ function sendToParty(data) {
                         fileName: data.fileName,
                         fileSize: data.fileSize,
                         timestamp: Date.now()
-                    });
+                    }).catch(handleFirebaseWriteError);
                 }
             } else if (data.type === "ytSync") {
                 if (partyState.isHost || partyState.allowGuestControls) {
@@ -751,7 +751,7 @@ function sendToParty(data) {
                         action: data.action,
                         time: data.time,
                         timestamp: Date.now()
-                    });
+                    }).catch(handleFirebaseWriteError);
                 }
             }
         }
@@ -815,8 +815,13 @@ async function loadPartyMedia(mediaId, type = "movie", server = 1, season = 1, e
     // Handle video player visibility & source mapping
     const video = document.getElementById("partyVideo");
     const customPanel = document.getElementById("partyCustomUrlPanel");
+    const syncLabel = document.getElementById("partySyncStatusNotice");
     
     if (server === 5) {
+        if (syncLabel) {
+            syncLabel.innerText = "⚡ Real-time Playback Sync Active";
+            syncLabel.style.color = "var(--primary-neon)";
+        }
         if (type === "youtube") {
             iframe.style.display = "block";
             iframe.classList.remove("hidden");
@@ -844,6 +849,10 @@ async function loadPartyMedia(mediaId, type = "movie", server = 1, season = 1, e
         document.getElementById("partyTvControls").style.display = "none";
         document.getElementById("partyTvControls").classList.add("hidden");
     } else {
+        if (syncLabel) {
+            syncLabel.innerText = "⚠️ Catalog Item Syncing Only (Iframe Locked)";
+            syncLabel.style.color = "#ffab00";
+        }
         partyState.localFileName = null;
         partyState.localFileSize = null;
         const promptEl = document.getElementById("localFilePrompt");
@@ -2221,5 +2230,12 @@ function exitFirebaseRoom() {
         }
         window.removeEventListener("beforeunload", exitFirebaseRoom);
         partyState.dbRoomRef = null;
+    }
+}
+
+function handleFirebaseWriteError(err) {
+    console.error("Firebase database write error:", err);
+    if (err && err.message && err.message.includes("Permission denied")) {
+        showToast("Database Permission Denied! Update your Firebase rules to read/write: true.");
     }
 }
