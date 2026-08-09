@@ -1204,6 +1204,25 @@ function leaveWatchParty() {
     exitFirebaseRoom();
     partyState.inParty = false;
     
+    // Clean up active streams and players
+    const iframe = document.getElementById("partyIframe");
+    if (iframe) iframe.src = "about:blank";
+    const video = document.getElementById("partyVideo");
+    if (video) {
+        video.pause();
+        video.src = "";
+        try { video.load(); } catch(e) {}
+    }
+    partyState.activeMedia = {
+        id: null,
+        title: "",
+        type: "movie",
+        server: 1,
+        season: 1,
+        episode: 1
+    };
+    partyState.ytPlayer = null;
+
     // Stop audio
     if (partyState.localAudioStream) {
         partyState.localAudioStream.getTracks().forEach(track => track.stop());
